@@ -1,6 +1,17 @@
 import { apiClient } from '$core/api';
 import { ENDPOINTS } from '$core/api';
+import { InventoryStockStatus } from '$core/constants';
 import type { ProductBatch, CreateBatchInput } from './inventory.types';
+
+function calculateStockStatus(quantityKg: number): InventoryStockStatus {
+  if (quantityKg > 500) {
+    return InventoryStockStatus.IN_STOCK;
+  }
+  if (quantityKg > 0) {
+    return InventoryStockStatus.LOW_STOCK;
+  }
+  return InventoryStockStatus.OUT_OF_STOCK;
+}
 
 // Mock database simulating Spring Boot backend persistence
 let mockBatches: ProductBatch[] = [
@@ -12,7 +23,7 @@ let mockBatches: ProductBatch[] = [
     origin: 'Bình Phước',
     quantityKg: 1250,
     unitPrice: 285000,
-    status: 'IN_STOCK',
+    status: InventoryStockStatus.IN_STOCK,
     updatedAt: '31/10/2026'
   },
   {
@@ -23,7 +34,7 @@ let mockBatches: ProductBatch[] = [
     origin: 'Đắk Lắk',
     quantityKg: 480,
     unitPrice: 320000,
-    status: 'LOW_STOCK',
+    status: InventoryStockStatus.LOW_STOCK,
     updatedAt: '30/10/2026'
   },
   {
@@ -34,7 +45,7 @@ let mockBatches: ProductBatch[] = [
     origin: 'California',
     quantityKg: 820,
     unitPrice: 260000,
-    status: 'IN_STOCK',
+    status: InventoryStockStatus.IN_STOCK,
     updatedAt: '29/10/2026'
   },
   {
@@ -45,7 +56,7 @@ let mockBatches: ProductBatch[] = [
     origin: 'Mỹ',
     quantityKg: 0,
     unitPrice: 390000,
-    status: 'OUT_OF_STOCK',
+    status: InventoryStockStatus.OUT_OF_STOCK,
     updatedAt: '28/10/2026'
   },
   {
@@ -56,7 +67,7 @@ let mockBatches: ProductBatch[] = [
     origin: 'Chile',
     quantityKg: 650,
     unitPrice: 210000,
-    status: 'IN_STOCK',
+    status: InventoryStockStatus.IN_STOCK,
     updatedAt: '27/10/2026'
   }
 ];
@@ -79,15 +90,25 @@ export async function createInventoryBatch(input: CreateBatchInput): Promise<Pro
     // fallback
   }
 
+  let qty = 100;
+  if (input.quantityKg) {
+    qty = input.quantityKg;
+  }
+
+  let price = 250000;
+  if (input.unitPrice) {
+    price = input.unitPrice;
+  }
+
   const newBatch: ProductBatch = {
     id: String(mockBatches.length + 1),
     code: `PN-0${mockBatches.length + 1}`,
     name: input.name,
     category: input.category || 'Hạt các loại',
     origin: input.origin || 'Việt Nam',
-    quantityKg: input.quantityKg || 100,
-    unitPrice: input.unitPrice || 250000,
-    status: input.quantityKg > 500 ? 'IN_STOCK' : input.quantityKg > 0 ? 'LOW_STOCK' : 'OUT_OF_STOCK',
+    quantityKg: qty,
+    unitPrice: price,
+    status: calculateStockStatus(qty),
     updatedAt: new Date().toLocaleDateString('vi-VN')
   };
 

@@ -134,6 +134,11 @@
       const targetDept = departments.find((d) => String(d.id) === selectedDepartmentId);
       const targetRole = roles.find((r) => String(r.id) === selectedRoleId);
 
+      let assignedRoleIds: number[] | undefined = undefined;
+      if (roleIdNum) {
+        assignedRoleIds = [roleIdNum];
+      }
+
       const created = await createUser({
         username: StringHelper.toLowerCase(trimmedUser),
         fullName: trimmedName,
@@ -142,7 +147,7 @@
         password: StringHelper.trim(password) || 'Premier@123',
         departmentId: deptIdNum || undefined,
         department: targetDept?.name,
-        roleIds: roleIdNum ? [roleIdNum] : undefined,
+        roleIds: assignedRoleIds,
         role: targetRole?.code
       });
 
@@ -284,7 +289,11 @@
       Hủy bỏ
     </Button>
     <Button variant="primary" onclick={handleSubmit} disabled={submitting || loadingData}>
-      {submitting ? 'Đang tạo...' : 'Xác nhận tạo tài khoản'}
+      {#if submitting}
+        Đang tạo...
+      {:else}
+        Xác nhận tạo tài khoản
+      {/if}
     </Button>
   {/snippet}
 </Modal>

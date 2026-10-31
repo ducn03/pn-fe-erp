@@ -1,5 +1,9 @@
+import { HealthStatus } from '$core/constants';
+
+export { HealthStatus };
+
 export interface HealthIndicator {
-  status: 'UP' | 'DOWN' | 'UNKNOWN';
+  status: HealthStatus | 'UNKNOWN';
   details?: Record<string, any>;
 }
 
@@ -7,11 +11,11 @@ export interface ServiceHealthData {
   serviceId: string;
   name: string;
   port: number;
-  status: 'UP' | 'DOWN';
+  status: HealthStatus;
   uptime?: string;
   database?: {
     type: string;
-    status: string;
+    status: HealthStatus | string;
   };
   diskSpace?: {
     totalGb: number;

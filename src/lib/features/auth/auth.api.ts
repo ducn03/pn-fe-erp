@@ -13,10 +13,15 @@ export async function login(input: LoginRequest): Promise<LoginResponseData> {
 
   if (resData && resData.accessToken) {
     const user = resData.user;
+    let fullName = user.username;
+    if (user.username === 'admin') {
+      fullName = 'Quản Trị Viên Hệ Thống';
+    }
+
     const sessionUser: AuthUser = {
       id: user.userId,
       username: user.username,
-      fullName: user.username === 'admin' ? 'Quản Trị Viên Hệ Thống' : user.username,
+      fullName: fullName,
       email: `${user.username}@premiernuts.vn`,
       roles: user.roles || [],
       companyId: user.companyId

@@ -1,14 +1,39 @@
 <script lang="ts">
-  import { Table, Badge, Button, toast } from '$ui';
+  import { Table, Badge, Button, toast, BADGE_VARIANTS, type BadgeVariant } from '$ui';
   import { DateHelper } from '$core/utils';
   import { authStore } from '$core/stores';
-  import type { User, UserRole } from '../identity.types';
+  import { UserStatus, type User, type UserRole } from '../identity.types';
+  import { UI_CONSTANTS } from '$core/constants';
 
   interface Props {
     users: User[];
   }
 
   let { users }: Props = $props();
+
+  function getUserStatusBadgeVariant(status: UserStatus | string): BadgeVariant {
+    if (status === UserStatus.ACTIVE) {
+      return BADGE_VARIANTS.SUCCESS;
+    }
+    return BADGE_VARIANTS.ERROR;
+  }
+
+  function getUserStatusText(status: UserStatus | string): string {
+    if (status === UserStatus.ACTIVE) {
+      return 'Hoạt động';
+    }
+    return 'Đã khóa';
+  }
+
+  function formatDepartment(u: User): string {
+    if (u.department) {
+      return u.department;
+    }
+    if (u.departmentName) {
+      return u.departmentName;
+    }
+    return UI_CONSTANTS.EMPTY_PLACEHOLDER;
+  }
 
   function getRoleBadge(role: UserRole | undefined) {
     switch (role) {
@@ -24,7 +49,11 @@
       case 'ROLE_QC':
         return { label: 'Kỹ Thuật Viên QC', variant: 'outline' as const };
       default:
-        return { label: role || 'Nhân Viên', variant: 'neutral' as const };
+        let fallbackRole = 'Nhân Viên';
+        if (role) {
+          fallbackRole = role;
+        }
+        return { label: fallbackRole, variant: 'neutral' as const };
     }
   }
 
@@ -61,13 +90,13 @@
           <td><span class="username-tag">{u.username}</span></td>
           <td class="font-bold">{u.fullName}</td>
           <td class="text-muted">{u.email}</td>
-          <td>{u.department || u.departmentName || '—'}</td>
+          <td>{formatDepartment(u)}</td>
           <td>
             <Badge variant={roleInfo.variant}>{roleInfo.label}</Badge>
           </td>
           <td>
-            <Badge variant={u.status === 'ACTIVE' ? 'success' : 'error'}>
-              {u.status === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}
+            <Badge variant={getUserStatusBadgeVariant(u.status)}>
+              {getUserStatusText(u.status)}
             </Badge>
           </td>
           <td class="text-muted font-mono">{DateHelper.formatDate(u.createdAt)}</td>

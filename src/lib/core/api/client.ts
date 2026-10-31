@@ -62,8 +62,15 @@ class ApiClient {
   }
 
   private buildUrl(path: string, params?: Record<string, string | number | boolean | undefined | null>, baseUrlOverride?: string): string {
-    const base = baseUrlOverride || this.baseUrl;
-    const url = new URL(path.startsWith('http') ? path : `${base}${path}`);
+    let base = this.baseUrl;
+    if (baseUrlOverride) {
+      base = baseUrlOverride;
+    }
+    let target = `${base}${path}`;
+    if (path.startsWith('http')) {
+      target = path;
+    }
+    const url = new URL(target);
     if (params) {
       Object.entries(params).forEach(([key, val]) => {
         if (val !== undefined && val !== null) {
@@ -74,17 +81,32 @@ class ApiClient {
     return url.toString();
   }
 
+  private serializeBody(body: any): string | undefined {
+    if (body !== undefined && body !== null) {
+      return JSON.stringify(body);
+    }
+    return undefined;
+  }
+
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const { params, token, baseUrl, headers = {}, ...rest } = options;
     const url = this.buildUrl(path, params, baseUrl);
 
-    const authToken = token || this.getAuthToken();
-    const finalHeaders: HeadersInit = {
+    let authToken = this.getAuthToken();
+    if (token) {
+      authToken = token;
+    }
+
+    const finalHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...headers
+      Accept: 'application/json'
     };
+    if (authToken) {
+      finalHeaders['Authorization'] = `Bearer ${authToken}`;
+    }
+    if (headers) {
+      Object.assign(finalHeaders, headers);
+    }
 
     try {
       const response = await fetch(url, {
@@ -100,8 +122,18 @@ class ApiClient {
           errorData = await response.text();
         }
 
-        const msg = (errorData && (errorData.message || errorData.error)) || `Yêu cầu thất bại (HTTP ${response.status})`;
-        const code = errorData && errorData.code;
+        let msg = `Yêu cầu thất bại (HTTP ${response.status})`;
+        if (errorData) {
+          if (errorData.message) {
+            msg = errorData.message;
+          } else if (errorData.error) {
+            msg = errorData.error;
+          }
+        }
+        let code: string | undefined = undefined;
+        if (errorData && errorData.code) {
+          code = errorData.code;
+        }
 
         throw new ApiError(msg, response.status, code, errorData);
       }
@@ -116,8 +148,12 @@ class ApiClient {
       if (err instanceof ApiError) {
         throw err;
       }
+      let errMsg = 'Lỗi mạng hoặc không thể kết nối tới dịch vụ backend';
+      if (err && err.message) {
+        errMsg = err.message;
+      }
       throw new ApiError(
-        err.message || 'Lỗi mạng hoặc không thể kết nối tới dịch vụ backend',
+        errMsg,
         0,
         'NETWORK_ERROR',
         err
@@ -133,7 +169,7 @@ class ApiClient {
     return this.request<T>(path, {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined
+      body: this.serializeBody(body)
     });
   }
 
@@ -141,7 +177,7 @@ class ApiClient {
     return this.request<T>(path, {
       ...options,
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined
+      body: this.serializeBody(body)
     });
   }
 
@@ -149,7 +185,7 @@ class ApiClient {
     return this.request<T>(path, {
       ...options,
       method: 'PATCH',
-      body: body ? JSON.stringify(body) : undefined
+      body: this.serializeBody(body)
     });
   }
 

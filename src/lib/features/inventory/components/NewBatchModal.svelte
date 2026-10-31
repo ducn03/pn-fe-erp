@@ -106,7 +106,11 @@
       Hủy bỏ
     </Button>
     <Button variant="primary" onclick={handleSubmit} disabled={loading}>
-      {loading ? 'Đang lưu...' : 'Xác nhận nhập kho'}
+      {#if loading}
+        Đang lưu...
+      {:else}
+        Xác nhận nhập kho
+      {/if}
     </Button>
   {/snippet}
 </Modal>

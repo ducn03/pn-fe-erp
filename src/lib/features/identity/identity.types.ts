@@ -1,5 +1,21 @@
-export type UserRole = 'ROLE_ADMIN' | 'ROLE_KHO' | 'ROLE_KE_TOAN' | 'ROLE_SAN_XUAT' | string;
-export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'LOCKED' | string;
+import { CommonStatus } from '$core/constants';
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  LOCKED = 'LOCKED'
+}
+
+export enum UserRoleCode {
+  ROLE_ADMIN = 'ROLE_ADMIN',
+  ROLE_DIRECTOR = 'ROLE_DIRECTOR',
+  ROLE_ACCOUNTANT = 'ROLE_ACCOUNTANT',
+  ROLE_WAREHOUSE = 'ROLE_WAREHOUSE',
+  ROLE_QA_QC = 'ROLE_QA_QC',
+  ROLE_PRODUCTION = 'ROLE_PRODUCTION'
+}
+
+export type UserRole = UserRoleCode | string;
 
 export interface User {
   id: number | string;
@@ -12,7 +28,7 @@ export interface User {
   departmentName?: string;
   department?: string; // Compatibility alias
   companyId?: number;
-  status: UserStatus;
+  status: UserStatus | string;
   roles?: string[];
   role?: string; // Primary role compatibility
   roleIds?: number[];

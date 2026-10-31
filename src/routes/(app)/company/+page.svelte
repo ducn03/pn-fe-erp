@@ -4,7 +4,9 @@
     Card,
     Badge,
     Button,
-    toast
+    toast,
+    CARD_ACCENTS,
+    BADGE_VARIANTS
   } from '$ui';
   import {
     getCompany,
@@ -14,11 +16,19 @@
     type Department,
     type Role
   } from '$features/company';
+  import { UI_CONSTANTS } from '$core/constants';
 
   let company = $state<Company | null>(null);
   let departments = $state<Department[]>([]);
   let roles = $state<Role[]>([]);
   let loading = $state(true);
+
+  function formatField(value: string | null | undefined): string {
+    if (value && value.trim().length > 0) {
+      return value;
+    }
+    return UI_CONSTANTS.EMPTY_PLACEHOLDER;
+  }
 
   async function loadData(isManual = false) {
     loading = true;
@@ -35,7 +45,11 @@
         toast.success('Đã cập nhật dữ liệu doanh nghiệp mới nhất!');
       }
     } catch (err: any) {
-      toast.error('Không thể tải dữ liệu doanh nghiệp: ' + (err.message || 'Lỗi kết nối'));
+      let errDetail = 'Lỗi kết nối';
+      if (err && err.message) {
+        errDetail = err.message;
+      }
+      toast.error('Không thể tải dữ liệu doanh nghiệp: ' + errDetail);
     } finally {
       loading = false;
     }
@@ -68,31 +82,31 @@
 
 <!-- 1. Company Overview Card (Full Width) -->
 {#if company}
-  <Card accent="orange" style="margin-bottom: 24px;">
+  <Card accent={CARD_ACCENTS.ORANGE} style="margin-bottom: 24px;">
     <div class="company-card-header">
       <div>
         <div class="company-code-badge">{company.code}</div>
         <h2 class="company-name">{company.name}</h2>
       </div>
-      <Badge variant="success">Hoạt Động</Badge>
+      <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
     </div>
 
     <div class="company-grid">
       <div class="info-item">
         <span class="info-label">Mã số thuế</span>
-        <span class="info-value font-mono">{company.taxCode || '—'}</span>
+        <span class="info-value font-mono">{formatField(company.taxCode)}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Điện thoại liên hệ</span>
-        <span class="info-value">{company.phone || '—'}</span>
+        <span class="info-value">{formatField(company.phone)}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Email chính thức</span>
-        <span class="info-value">{company.email || '—'}</span>
+        <span class="info-value">{formatField(company.email)}</span>
       </div>
       <div class="info-item full-width">
         <span class="info-label">Địa chỉ trụ sở / Nhà máy</span>
-        <span class="info-value">{company.address || '—'}</span>
+        <span class="info-value">{formatField(company.address)}</span>
       </div>
     </div>
   </Card>
@@ -100,7 +114,7 @@
 
 <!-- 2. Departments Table (Trải ngang full width, responsive) -->
 <div class="tables-stack">
-  <Card accent="orange">
+  <Card accent={CARD_ACCENTS.ORANGE}>
     <div class="section-title-row">
       <div>
         <h3 class="section-title">Phòng Ban & Phân Xưởng</h3>
@@ -125,7 +139,7 @@
               <td class="font-bold">{dept.name}</td>
               <td class="desc-cell">{dept.description}</td>
               <td style="text-align: center;">
-                <Badge variant="success">Hoạt động</Badge>
+                <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt động</Badge>
               </td>
             </tr>
           {:else}
@@ -139,7 +153,7 @@
   </Card>
 
   <!-- 3. Roles Table (Trải ngang full width, responsive) -->
-  <Card accent="orange">
+  <Card accent={CARD_ACCENTS.ORANGE}>
     <div class="section-title-row">
       <div>
         <h3 class="section-title">Vai Trò & Chức Vụ Phân Quyền</h3>
@@ -164,7 +178,7 @@
               <td class="font-bold">{role.name}</td>
               <td class="desc-cell">{role.description}</td>
               <td style="text-align: center;">
-                <Badge variant="success">Hoạt động</Badge>
+                <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt động</Badge>
               </td>
             </tr>
           {:else}

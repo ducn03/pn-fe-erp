@@ -3,18 +3,33 @@
  * Supports pn-api-gateway (port 8080) and direct pn-identity dev mode (port 8081)
  */
 
-export const GATEWAY_URL = typeof window !== 'undefined'
-  ? (window as any).__PN_GATEWAY_URL__ || 'http://localhost:9000'
-  : 'http://localhost:9000';
+export const DEFAULT_GATEWAY_URL = 'http://localhost:9000';
+export const DEFAULT_IDENTITY_URL = 'http://localhost:9001';
 
-export const IDENTITY_DIRECT_URL = typeof window !== 'undefined'
-  ? (window as any).__PN_IDENTITY_URL__ || 'http://localhost:9001'
-  : 'http://localhost:9001';
+function resolveGatewayUrl(): string {
+  if (typeof window !== 'undefined' && (window as any).__PN_GATEWAY_URL__) {
+    return (window as any).__PN_GATEWAY_URL__;
+  }
+  return DEFAULT_GATEWAY_URL;
+}
 
-// Default active API Base (Calling via Gateway :9000)
-export const API_BASE_URL = typeof window !== 'undefined'
-  ? (window as any).__PN_API_URL__ || GATEWAY_URL
-  : GATEWAY_URL;
+function resolveIdentityUrl(): string {
+  if (typeof window !== 'undefined' && (window as any).__PN_IDENTITY_URL__) {
+    return (window as any).__PN_IDENTITY_URL__;
+  }
+  return DEFAULT_IDENTITY_URL;
+}
+
+function resolveApiBaseUrl(): string {
+  if (typeof window !== 'undefined' && (window as any).__PN_API_URL__) {
+    return (window as any).__PN_API_URL__;
+  }
+  return resolveGatewayUrl();
+}
+
+export const GATEWAY_URL = resolveGatewayUrl();
+export const IDENTITY_DIRECT_URL = resolveIdentityUrl();
+export const API_BASE_URL = resolveApiBaseUrl();
 
 export const ENDPOINTS = {
   // Gateway & System Health

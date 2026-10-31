@@ -11,6 +11,13 @@
   let rememberMe = $state(true);
   let loading = $state(false);
 
+  let passwordInputType = $derived.by(() => {
+    if (showPassword) {
+      return 'text';
+    }
+    return 'password';
+  });
+
   // Field-level error messages
   let usernameError = $state('');
   let passwordError = $state('');
@@ -154,12 +161,16 @@
             onclick={() => (showPassword = !showPassword)}
             tabindex="-1"
           >
-            {showPassword ? 'Ẩn' : 'Hiện'}
+            {#if showPassword}
+              Ẩn
+            {:else}
+              Hiện
+            {/if}
           </button>
         </div>
         <input
           id="password"
-          type={showPassword ? 'text' : 'password'}
+          type={passwordInputType}
           class="form-input"
           class:has-error={!!passwordError}
           placeholder="Nhập mật khẩu"

@@ -4,16 +4,56 @@
     Card,
     Badge,
     Button,
-    toast
+    toast,
+    CARD_ACCENTS,
+    BADGE_VARIANTS,
+    type CardAccent,
+    type BadgeVariant
   } from '$ui';
   import {
     getAllServicesHealth,
+    HealthStatus,
     type ServiceHealthData
   } from '$features/health';
 
   let services = $state<ServiceHealthData[]>([]);
   let loading = $state(true);
   let lastChecked = $state('');
+
+  function getServiceAccent(status: HealthStatus): CardAccent {
+    if (status === HealthStatus.UP) {
+      return CARD_ACCENTS.GREEN;
+    }
+    return CARD_ACCENTS.ORANGE;
+  }
+
+  function getServiceBadgeVariant(status: HealthStatus): BadgeVariant {
+    if (status === HealthStatus.UP) {
+      return BADGE_VARIANTS.SUCCESS;
+    }
+    return BADGE_VARIANTS.ERROR;
+  }
+
+  function getServiceStatusText(status: HealthStatus): string {
+    if (status === HealthStatus.UP) {
+      return 'Đang Hoạt Động (UP)';
+    }
+    return 'Mất Kết Nối (DOWN)';
+  }
+
+  function getDatabaseIndicatorClass(status: string | HealthStatus): string {
+    if (status === HealthStatus.UP) {
+      return 'up';
+    }
+    return 'down';
+  }
+
+  function getDatabaseStatusText(status: string | HealthStatus): string {
+    if (status === HealthStatus.UP) {
+      return 'Kết nối tốt';
+    }
+    return 'Mất kết nối';
+  }
 
   async function checkHealth() {
     loading = true;
@@ -22,7 +62,11 @@
       lastChecked = new Date().toLocaleTimeString('vi-VN');
       toast.success('Đã cập nhật trạng thái các dịch vụ');
     } catch (err: any) {
-      toast.error('Lỗi khi kiểm tra trạng thái: ' + (err.message || 'Lỗi mạng'));
+      let errMsg = 'Lỗi mạng';
+      if (err && err.message) {
+        errMsg = err.message;
+      }
+      toast.error('Lỗi khi kiểm tra trạng thái: ' + errMsg);
     } finally {
       loading = false;
     }
@@ -58,15 +102,15 @@
 
 <div class="health-grid">
   {#each services as s (s.serviceId)}
-    <Card accent={s.status === 'UP' ? 'green' : 'orange'}>
+    <Card accent={getServiceAccent(s.status)}>
       <div class="service-card-header">
         <div>
           <span class="service-id-tag">{s.serviceId}</span>
           <h3 class="service-title">{s.name}</h3>
           <span class="port-label">Cổng mạng: :{s.port}</span>
         </div>
-        <Badge variant={s.status === 'UP' ? 'success' : 'error'}>
-          {s.status === 'UP' ? 'Đang Hoạt Động (UP)' : 'Mất Kết Nối (DOWN)'}
+        <Badge variant={getServiceBadgeVariant(s.status)}>
+          {getServiceStatusText(s.status)}
         </Badge>
       </div>
 
@@ -76,8 +120,8 @@
           <div class="metric-row">
             <span class="metric-name">Cơ sở dữ liệu ({s.database.type})</span>
             <div class="metric-val-group">
-              <span class="status-indicator {s.database.status === 'UP' ? 'up' : 'down'}"></span>
-              <span class="font-bold">{s.database.status === 'UP' ? 'Kết nối tốt' : 'Mất kết nối'}</span>
+              <span class="status-indicator {getDatabaseIndicatorClass(s.database.status)}"></span>
+              <span class="font-bold">{getDatabaseStatusText(s.database.status)}</span>
             </div>
           </div>
         {/if}

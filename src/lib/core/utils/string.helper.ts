@@ -22,7 +22,10 @@ export class StringHelper {
       return null;
     }
     const trimmed = str.trim();
-    return trimmed.length === 0 ? null : trimmed;
+    if (trimmed.length === 0) {
+      return null;
+    }
+    return trimmed;
   }
 
   static toLowerCase(str: string | null | undefined): string {
