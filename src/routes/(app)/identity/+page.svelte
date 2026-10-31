@@ -5,13 +5,13 @@
     PageHeader,
     Callout,
     toast
-  } from '#lib/premier-ui';
+  } from '$ui';
   import {
     UserTable,
     NewUserModal,
     getUsers,
     type User
-  } from '#lib/modules/identity';
+  } from '$features/identity';
 
   let users = $state<User[]>([]);
   let isModalOpen = $state(false);
@@ -35,7 +35,7 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={() => toast.info('Đang đồng bộ danh sách quyền từ pn-identity (:8081)...')}>
+    <Button variant="secondary" onclick={() => toast.info('Đang đồng bộ danh sách quyền từ pn-identity (:9001)...')}>
       Đồng bộ quyền
     </Button>
     <Button variant="primary" onclick={() => (isModalOpen = true)}>
@@ -45,7 +45,7 @@
 </PageHeader>
 
 <Callout variant="info" title="Microservice Identity (Spring Boot pn-identity)">
-  Phân hệ này liên kết trực tiếp với backend <code>pn-identity</code> chạy trên cổng <code>8081</code> qua <code>pn-api-gateway</code> (cổng <code>8080</code>). Hệ thống hỗ trợ xác thực JWT và phân quyền chi tiết cho Ban giám đốc, Thủ kho, Kế toán và Quản đốc nhà máy.
+  Phân hệ này liên kết trực tiếp với backend <code>pn-identity</code> chạy trên cổng <code>9001</code> qua <code>pn-api-gateway</code> (cổng <code>9000</code>). Hệ thống hỗ trợ xác thực JWT và phân quyền chi tiết cho Ban giám đốc, Thủ kho, Kế toán và Quản đốc nhà máy.
 </Callout>
 
 <Card accent="orange" style="margin-top: 18px;">

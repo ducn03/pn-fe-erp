@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StatCard } from '#lib/premier-ui';
+  import { StatCard } from '$ui';
   import type { StatMetric } from '../dashboard.types';
 
   interface Props {

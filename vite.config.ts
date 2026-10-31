@@ -1,3 +1,4 @@
+import path from 'node:path';
 import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
@@ -16,5 +17,15 @@ export default defineConfig({
 			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 			adapter: adapter()
 		})
-	]
+	],
+	resolve: {
+		alias: {
+			$core: path.resolve('./src/lib/core'),
+			'#core': path.resolve('./src/lib/core'),
+			$ui: path.resolve('./src/lib/premier-ui'),
+			'#ui': path.resolve('./src/lib/premier-ui'),
+			$features: path.resolve('./src/lib/features'),
+			'#features': path.resolve('./src/lib/features')
+		}
+	}
 });

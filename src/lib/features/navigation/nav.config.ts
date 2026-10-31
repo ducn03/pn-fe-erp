@@ -1,4 +1,4 @@
-import type { NavSection } from '#lib/premier-ui/types';
+import type { NavSection } from '$ui/types';
 
 export const ERP_NAV_SECTIONS: NavSection[] = [
   {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Table, Badge, Button, toast } from '#lib/premier-ui';
+  import { Table, Badge, Button, toast } from '$ui';
   import type { ProductBatch } from '../inventory.types';
 
   interface Props {

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Modal, Input, Select, Button, toast } from '#lib/premier-ui';
+  import { Modal, Input, Select, Button, toast } from '$ui';
+  import { StringHelper } from '$core/utils';
   import { createInventoryBatch } from '../inventory.api';
   import type { ProductBatch } from '../inventory.types';
 
@@ -18,7 +19,8 @@
   let loading = $state(false);
 
   async function handleSubmit() {
-    if (!name.trim()) {
+    const trimmedName = StringHelper.trim(name);
+    if (StringHelper.isBlank(trimmedName)) {
       toast.error('Vui lòng nhập tên lô hạt!');
       return;
     }
@@ -26,9 +28,9 @@
     loading = true;
     try {
       const created = await createInventoryBatch({
-        name: name.trim(),
+        name: trimmedName,
         category,
-        origin,
+        origin: StringHelper.trim(origin),
         quantityKg: Number(quantityKg) || 100,
         unitPrice: Number(unitPrice) || 250000
       });

@@ -6,7 +6,19 @@
 			"$lib": ["./src/lib"],
 			"$lib/*": ["./src/lib/*"],
 			"#lib": ["./src/lib"],
-			"#lib/*": ["./src/lib/*"]
+			"#lib/*": ["./src/lib/*"],
+			"$core": ["./src/lib/core"],
+			"$core/*": ["./src/lib/core/*"],
+			"#core": ["./src/lib/core"],
+			"#core/*": ["./src/lib/core/*"],
+			"$ui": ["./src/lib/premier-ui"],
+			"$ui/*": ["./src/lib/premier-ui/*"],
+			"#ui": ["./src/lib/premier-ui"],
+			"#ui/*": ["./src/lib/premier-ui/*"],
+			"$features": ["./src/lib/features"],
+			"$features/*": ["./src/lib/features/*"],
+			"#features": ["./src/lib/features"],
+			"#features/*": ["./src/lib/features/*"]
 		}
 	},
 	"include": ["src", "vite.config.ts"]

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { Button } from '#lib/premier-ui';
+  import { Button } from '$ui';
 
   let status = $derived(page.status);
   let message = $derived(page.error?.message || '');
@@ -38,7 +38,7 @@
           tip: 'Cụm dịch vụ pn-api-gateway hoặc các microservices vệ tinh có thể đang khởi động lại hoặc mất kết nối.',
           actionPrimary: 'Tải lại trang (Reload)',
           actionPrimaryHref: 'reload',
-          actionSecondary: 'Kiểm tra Cụm Gateway (:8080)',
+          actionSecondary: 'Kiểm tra Cụm Gateway (:9000)',
           actionSecondaryHref: '/gateway'
         };
       case 502:
@@ -47,7 +47,7 @@
         return {
           code: String(status),
           title: 'Cổng Kết Nối Không Khả Dụng (Gateway Unavailable)',
-          subtitle: 'Không thể thiết lập kết nối tới Spring Cloud Gateway (pn-api-gateway:8080).',
+          subtitle: 'Không thể thiết lập kết nối tới Spring Cloud Gateway (pn-api-gateway:9000).',
           tip: 'Hãy đảm bảo tiến trình backend đang chạy và cổng mạng nội bộ không bị chặn tường lửa.',
           actionPrimary: 'Tải lại trang',
           actionPrimaryHref: 'reload',
@@ -137,7 +137,7 @@
     <!-- Footer Information -->
     <div class="error-footer">
       <span>Premier Nuts Enterprise Resource Planning (PN-ERP)</span>
-      <span>Cổng dịch vụ: Gateway :8080 • Identity :8081</span>
+      <span>Cổng dịch vụ: Gateway :9000 • Identity :9001</span>
     </div>
   </div>
 </div>

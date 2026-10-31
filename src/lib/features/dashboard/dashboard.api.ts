@@ -1,7 +1,6 @@
 import type { StatMetric, ServiceHealth } from './dashboard.types';
 
 export async function getDashboardStats(): Promise<StatMetric[]> {
-  // In production, fetch via apiClient.get('/api/v1/dashboard/stats')
   return [
     {
       id: 'stat-inventory',
@@ -39,14 +38,14 @@ export async function getServicesHealth(): Promise<ServiceHealth[]> {
     {
       name: 'Spring Cloud API Gateway',
       serviceId: 'pn-api-gateway',
-      port: 8080,
+      port: 9000,
       status: 'UP',
       uptime: '99.98%'
     },
     {
       name: 'Identity & Authentication Service',
       serviceId: 'pn-identity',
-      port: 8081,
+      port: 9001,
       status: 'UP',
       uptime: '99.95%'
     },

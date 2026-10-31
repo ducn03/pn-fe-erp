@@ -6,14 +6,14 @@
     PageHeader,
     Callout,
     toast
-  } from '#lib/premier-ui';
-  import { StatCardsGrid, getDashboardStats } from '#lib/modules/dashboard';
+  } from '$ui';
+  import { StatCardsGrid, getDashboardStats } from '$features/dashboard';
   import {
     InventoryTable,
     NewBatchModal,
     getInventoryBatches,
     type ProductBatch
-  } from '#lib/modules/inventory';
+  } from '$features/inventory';
 
   // Metrics & Inventory data (Svelte 5 runes)
   let metrics = $state<any[]>([]);
@@ -50,7 +50,7 @@
   {#snippet actions()}
     <Button
       variant="secondary"
-      onclick={() => toast.info('Đang đồng bộ dữ liệu từ pn-api-gateway (:8080)...')}
+      onclick={() => toast.info('Đang đồng bộ dữ liệu từ pn-api-gateway (:9000)...')}
     >
       Đồng bộ dữ liệu
     </Button>
@@ -74,7 +74,7 @@
         <div class="tab-header">
           <div>
             <h3>Tổng quan các lô hạt tồn kho</h3>
-            <p class="text-muted">Dữ liệu được quản lý bởi module nghiệp vụ <code>#lib/modules/inventory</code></p>
+            <p class="text-muted">Dữ liệu được quản lý bởi feature nghiệp vụ <code>$features/inventory</code></p>
           </div>
           <Button variant="outline" size="sm" onclick={() => (isNewBatchModalOpen = true)}>
             + Thêm lô hạt
@@ -86,35 +86,35 @@
     {:else if activeTab === 'tab-architecture'}
       <div class="tab-content">
         <div class="tab-header">
-          <h3>Mô hình phân hệ nghiệp vụ (Feature-Based Architecture)</h3>
-          <p class="text-muted">Mỗi nghiệp vụ được đóng gói độc lập gồm Types, API Service và Components.</p>
+          <h3>Kiến Trúc Frontend Linh Hoạt (3 Trụ Cột Tương Ứng Backend)</h3>
+          <p class="text-muted">Phân tách rõ ràng giữa Hạ tầng Core, Thư viện UI thuần túy và các Phân hệ Nghiệp vụ.</p>
         </div>
 
         <div class="feature-cards-grid">
           <div class="feature-box">
-            <div class="feature-title">1. Phân hệ Kho & Nguyên liệu</div>
-            <div class="feature-path">src/lib/modules/inventory/</div>
-            <p class="feature-desc">Quản lý lô hạt, đơn giá, kiểm kê tồn kho và tạo phiếu nhập kho.</p>
-            <a href="/kho" class="feature-link">Truy cập màn hình Kho →</a>
+            <div class="feature-title">Trụ cột 1: Hạ tầng Core</div>
+            <div class="feature-path">$core/ (src/lib/core/)</div>
+            <p class="feature-desc">ApiClient, Auth Interceptor, Auth Store (Svelte 5 Runes), StringHelper & DateHelper.</p>
+            <span class="feature-link">Dùng chung toàn app</span>
           </div>
 
           <div class="feature-box">
-            <div class="feature-title">2. Phân hệ Định danh & Phân quyền</div>
-            <div class="feature-path">src/lib/modules/identity/</div>
-            <p class="feature-desc">Kết nối microservice <code>pn-identity</code> (:8081) để cấp quyền Admin, Thủ kho, Kế toán.</p>
+            <div class="feature-title">Trụ cột 2: Design System UI</div>
+            <div class="feature-path">$ui/ (src/lib/premier-ui/)</div>
+            <p class="feature-desc">Thư viện UI thuần túy: Button, Table, Modal, Input, Badge, Sidebar, Theme tokens (100% độc lập nghiệp vụ).</p>
+            <span class="feature-link">Sẵn sàng tách thành NPM Lib</span>
+          </div>
+
+          <div class="feature-box">
+            <div class="feature-title">Trụ cột 3: Feature Modules</div>
+            <div class="feature-path">$features/ (src/lib/features/)</div>
+            <p class="feature-desc">Khớp 1-1 với microservices BE: <code>identity</code> (:9001), <code>inventory</code>, <code>dashboard</code>, <code>navigation</code>.</p>
             <a href="/identity" class="feature-link">Truy cập Quản lý User →</a>
-          </div>
-
-          <div class="feature-box">
-            <div class="feature-title">3. Cụm Gateway & Microservices</div>
-            <div class="feature-path">src/lib/api/</div>
-            <p class="feature-desc">HTTP client chuẩn hóa chuyển tiếp request qua <code>pn-api-gateway</code> (:8080).</p>
-            <a href="/gateway" class="feature-link">Kiểm tra kết nối Gateway →</a>
           </div>
         </div>
 
-        <Callout variant="info" title="Lợi ích kiến trúc">
-          Khi cần thêm phân hệ mới (ví dụ: Bán hàng <code>orders</code>, Chế biến <code>manufacturing</code>), bạn chỉ cần tạo thêm 1 thư mục trong <code>src/lib/modules/</code> mà không lo ảnh hưởng tới các màn hình khác.
+        <Callout variant="info" title="Lợi ích kiến trúc 3 Trụ Cột">
+          Khi cần thêm tính năng mới, bạn chỉ cần tạo thư mục trong <code>src/lib/features/</code>. Thư viện <code>premier-ui</code> có thể tái sử dụng cho bất kỳ web app hoặc portal nào khác mà không bị dính logic ERP!
         </Callout>
       </div>
     {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { Sidebar } from '#lib/premier-ui';
-  import { ERP_NAV_SECTIONS } from '#lib/modules/navigation';
+  import { Sidebar } from '$ui';
+  import { ERP_NAV_SECTIONS } from '$features/navigation';
 
   let { children } = $props();
 

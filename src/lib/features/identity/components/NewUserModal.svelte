@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Modal, Input, Select, Button, toast } from '#lib/premier-ui';
+  import { Modal, Input, Select, Button, toast } from '$ui';
+  import { StringHelper } from '$core/utils';
   import { createUser } from '../identity.api';
   import type { User, UserRole } from '../identity.types';
 
@@ -18,7 +19,10 @@
   let loading = $state(false);
 
   async function handleSubmit() {
-    if (!username.trim() || !fullName.trim()) {
+    const trimmedUsername = StringHelper.trim(username);
+    const trimmedFullName = StringHelper.trim(fullName);
+
+    if (StringHelper.isBlank(trimmedUsername) || StringHelper.isBlank(trimmedFullName)) {
       toast.error('Vui lòng nhập đầy đủ tài khoản và họ tên!');
       return;
     }
@@ -26,11 +30,11 @@
     loading = true;
     try {
       const created = await createUser({
-        username: username.trim().toLowerCase(),
-        fullName: fullName.trim(),
-        email: email.trim() || `${username.trim()}@premiernuts.vn`,
+        username: StringHelper.toLowerCase(trimmedUsername),
+        fullName: trimmedFullName,
+        email: StringHelper.trim(email) || `${trimmedUsername}@premiernuts.vn`,
         role,
-        department
+        department: StringHelper.trim(department)
       });
 
       toast.success(`Đã cấp tài khoản thành công cho: ${created.fullName}`);

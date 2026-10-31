@@ -6,13 +6,13 @@
     Input,
     Select,
     toast
-  } from '#lib/premier-ui';
+  } from '$ui';
   import {
     InventoryTable,
     NewBatchModal,
     getInventoryBatches,
     type ProductBatch
-  } from '#lib/modules/inventory';
+  } from '$features/inventory';
 
   let batches = $state<ProductBatch[]>([]);
   let searchQuery = $state('');

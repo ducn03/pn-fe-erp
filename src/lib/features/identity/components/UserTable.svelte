@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Table, Badge, Button, toast } from '#lib/premier-ui';
+  import { Table, Badge, Button, toast } from '$ui';
+  import { DateHelper } from '$core/utils';
   import type { User, UserRole } from '../identity.types';
 
   interface Props {
@@ -8,8 +9,9 @@
 
   let { users }: Props = $props();
 
-  function getRoleBadge(role: UserRole) {
+  function getRoleBadge(role: UserRole | undefined) {
     switch (role) {
+      case 'SUPER_ADMIN':
       case 'ROLE_ADMIN':
         return { label: 'Quản Trị Viên (Admin)', variant: 'primary' as const };
       case 'ROLE_KHO':
@@ -19,7 +21,7 @@
       case 'ROLE_SAN_XUAT':
         return { label: 'Tổ Trưởng Sản Xuất', variant: 'success' as const };
       default:
-        return { label: role, variant: 'neutral' as const };
+        return { label: role || 'Nhân Viên', variant: 'neutral' as const };
     }
   }
 </script>
@@ -40,12 +42,12 @@
     </thead>
     <tbody>
       {#each users as u (u.id)}
-        {@const roleInfo = getRoleBadge(u.role)}
+        {@const roleInfo = getRoleBadge(u.role || (u.roles && u.roles[0]))}
         <tr>
           <td><strong>{u.username}</strong></td>
           <td>{u.fullName}</td>
           <td>{u.email}</td>
-          <td>{u.department}</td>
+          <td>{u.department || u.departmentName || '—'}</td>
           <td>
             <Badge variant={roleInfo.variant}>{roleInfo.label}</Badge>
           </td>
@@ -54,7 +56,7 @@
               {u.status === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}
             </Badge>
           </td>
-          <td>{u.createdAt}</td>
+          <td>{DateHelper.formatDate(u.createdAt)}</td>
           <td style="text-align: right;">
             <Button
               size="sm"

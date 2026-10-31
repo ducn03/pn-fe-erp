@@ -4,7 +4,7 @@
     Card,
     PageHeader,
     Callout
-  } from '#lib/premier-ui';
+  } from '$ui';
 </script>
 
 <PageHeader

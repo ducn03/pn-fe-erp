@@ -1,8 +1,8 @@
 <script lang="ts">
 	import favicon from '#lib/assets/favicon.svg';
 	import type { LayoutProps } from './$types';
-	import { ToastContainer } from '#lib/premier-ui';
-	import '#lib/premier-ui/theme.css';
+	import { ToastContainer } from '$ui';
+	import '$ui/theme.css';
 
 	let { children }: LayoutProps = $props();
 </script>

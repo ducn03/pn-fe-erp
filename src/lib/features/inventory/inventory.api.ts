@@ -1,3 +1,5 @@
+import { apiClient } from '$core/api';
+import { ENDPOINTS } from '$core/api';
 import type { ProductBatch, CreateBatchInput } from './inventory.types';
 
 // Mock database simulating Spring Boot backend persistence
@@ -60,11 +62,23 @@ let mockBatches: ProductBatch[] = [
 ];
 
 export async function getInventoryBatches(): Promise<ProductBatch[]> {
-  // In production: return apiClient.get<ProductBatch[]>(ENDPOINTS.INVENTORY.BATCHES);
-  return [...mockBatches];
+  try {
+    const res = await apiClient.get<ProductBatch[]>(ENDPOINTS.INVENTORY.BATCHES);
+    if (res && Array.isArray(res)) return res;
+    return [...mockBatches];
+  } catch {
+    return [...mockBatches];
+  }
 }
 
 export async function createInventoryBatch(input: CreateBatchInput): Promise<ProductBatch> {
+  try {
+    const res = await apiClient.post<ProductBatch>(ENDPOINTS.INVENTORY.BATCHES, input);
+    if (res && res.code) return res;
+  } catch {
+    // fallback
+  }
+
   const newBatch: ProductBatch = {
     id: String(mockBatches.length + 1),
     code: `PN-0${mockBatches.length + 1}`,

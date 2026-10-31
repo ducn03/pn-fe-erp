@@ -7,9 +7,9 @@
     Table,
     Callout,
     toast
-  } from '#lib/premier-ui';
-  import { getServicesHealth, type ServiceHealth } from '#lib/modules/dashboard';
-  import { API_BASE_URL } from '#lib/api';
+  } from '$ui';
+  import { getServicesHealth, type ServiceHealth } from '$features/dashboard';
+  import { API_BASE_URL } from '$core/api';
 
   let services = $state<ServiceHealth[]>([]);
   let testing = $state(false);
@@ -27,7 +27,7 @@
         toast.success(`Kết nối thành công tới pn-api-gateway tại ${API_BASE_URL}!`);
       } else {
         toast.warning(
-          `Gateway hiện chưa chạy trên cổng 8080. Hãy chạy 'mvn spring-boot:run' trong thư mục pn-api-gateway.`
+          `Gateway hiện chưa chạy trên cổng 9000. Hãy chạy 'mvn spring-boot:run' trong thư mục pn-api-gateway.`
         );
       }
     } catch {
@@ -55,7 +55,7 @@
 </PageHeader>
 
 <Callout variant="info" title="Cấu hình mạng cụm dịch vụ Premier Nuts">
-  Mọi truy vấn từ Frontend (Svelte) đều đi qua <strong>pn-api-gateway</strong> (cổng <code>8080</code>). Gateway này sẽ định tuyến các request <code>/api/v1/identity/**</code> sang <strong>pn-identity</strong> (cổng <code>8081</code>) và các microservice khác trong tương lai.
+  Mọi truy vấn từ Frontend (Svelte) đều đi qua <strong>pn-api-gateway</strong> (cổng <code>9000</code>). Gateway này sẽ định tuyến các request <code>/api/v1/identity/**</code> sang <strong>pn-identity</strong> (cổng <code>9001</code>) và các microservice khác trong tương lai.
 </Callout>
 
 <Card accent="orange" style="margin-top: 18px;">
