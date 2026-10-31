@@ -2,137 +2,132 @@ import { apiClient, type ApiEnvelope } from '$core/api';
 import { ENDPOINTS } from '$core/api';
 import type { User, CreateUserInput, UserListParams } from './identity.types';
 
-// Fallback mock users for offline development
-const mockUsers: User[] = [
-  {
-    id: 1,
-    username: 'admin',
-    fullName: 'Nguyễn Văn Quản Trị',
-    email: 'admin@premiernuts.vn',
-    roles: ['SUPER_ADMIN', 'ROLE_ADMIN'],
-    role: 'ROLE_ADMIN',
-    department: 'Ban Giám Đốc',
-    status: 'ACTIVE',
-    createdAt: '2026-01-01T08:00:00Z'
-  },
-  {
-    id: 2,
-    username: 'kho_truong',
-    fullName: 'Trần Văn Kho',
-    email: 'kho@premiernuts.vn',
-    roles: ['ROLE_KHO'],
-    role: 'ROLE_KHO',
-    department: 'Kho Vận & Logistics',
-    status: 'ACTIVE',
-    createdAt: '2026-02-15T09:30:00Z'
-  },
-  {
-    id: 3,
-    username: 'ketoan_truong',
-    fullName: 'Lê Thị Thu',
-    email: 'ketoan@premiernuts.vn',
-    roles: ['ROLE_KE_TOAN'],
-    role: 'ROLE_KE_TOAN',
-    department: 'Tài Chính Kế Toán',
-    status: 'ACTIVE',
-    createdAt: '2026-03-20T10:15:00Z'
-  },
-  {
-    id: 4,
-    username: 'sanxuat_lead',
-    fullName: 'Phạm Minh Sản Xuất',
-    email: 'sanxuat@premiernuts.vn',
-    roles: ['ROLE_SAN_XUAT'],
-    role: 'ROLE_SAN_XUAT',
-    department: 'Nhà Máy Chế Biến',
-    status: 'ACTIVE',
-    createdAt: '2026-04-10T14:00:00Z'
-  }
-];
-
 export async function getUsers(params?: UserListParams): Promise<User[]> {
-  try {
-    const res = await apiClient.get<ApiEnvelope<any> | any>(ENDPOINTS.IDENTITY.USERS, {
-      keyword: params?.keyword,
-      status: params?.status,
-      page: params?.page ?? 0,
-      size: params?.size ?? 50
-    });
+  const queryParams: Record<string, string | number | boolean | undefined | null> = {
+    page: params?.page ?? 0,
+    size: params?.size ?? 50
+  };
 
-    // Check if envelope with page data
-    let items: any[] = [];
-    if (res && res.data && Array.isArray(res.data.content)) {
-      items = res.data.content;
-    } else if (res && Array.isArray(res.data)) {
-      items = res.data;
-    } else if (Array.isArray(res)) {
-      items = res;
-    }
-
-    if (items.length > 0) {
-      return items.map((u: any) => ({
-        id: u.id,
-        username: u.username,
-        fullName: u.fullName || u.username,
-        email: u.email || `${u.username}@premiernuts.vn`,
-        phone: u.phone,
-        status: u.status || 'ACTIVE',
-        department: u.departmentName || u.department || 'Ban Nghiệp Vụ',
-        roles: u.roles || [],
-        role: (u.roles && u.roles[0]) || 'ROLE_ADMIN',
-        createdAt: u.createdAt || new Date().toISOString()
-      }));
-    }
-
-    return [...mockUsers];
-  } catch (error) {
-    console.warn('[IdentityApi] Backend pn-identity unavailable, using local mock data:', error);
-    return [...mockUsers];
+  if (params?.keyword) {
+    queryParams.keyword = params.keyword;
   }
+  if (params?.status) {
+    queryParams.status = params.status;
+  }
+  if (params?.departmentId) {
+    queryParams.departmentId = params.departmentId;
+  }
+  if (params?.companyId) {
+    queryParams.companyId = params.companyId;
+  }
+
+  const res = await apiClient.get<ApiEnvelope<any> | any>(ENDPOINTS.IDENTITY.USERS, queryParams);
+
+  let rawList: any[] = [];
+  if (res && res.data && Array.isArray(res.data.content)) {
+    rawList = res.data.content;
+  } else if (res && Array.isArray(res.data)) {
+    rawList = res.data;
+  } else if (Array.isArray(res)) {
+    rawList = res;
+  }
+
+  return rawList.map((u: any): User => {
+    let primaryRole = 'Nhân Viên';
+    if (u.roles && Array.isArray(u.roles) && u.roles.length > 0) {
+      primaryRole = u.roles[0];
+    } else if (u.role) {
+      primaryRole = u.role;
+    }
+
+    let deptName = '';
+    if (u.departmentName) {
+      deptName = u.departmentName;
+    } else if (u.department) {
+      deptName = u.department;
+    }
+
+    return {
+      id: u.id,
+      username: u.username,
+      fullName: u.fullName || u.username,
+      email: u.email || '',
+      phone: u.phone,
+      avatarUrl: u.avatarUrl,
+      departmentId: u.departmentId,
+      departmentName: deptName,
+      department: deptName,
+      companyId: u.companyId,
+      status: u.status,
+      roles: u.roles || [],
+      role: primaryRole,
+      roleIds: u.roleIds || [],
+      lastLoginAt: u.lastLoginAt,
+      createdAt: u.createdAt,
+      updatedAt: u.updatedAt
+    };
+  });
 }
 
 export async function createUser(input: CreateUserInput): Promise<User> {
-  try {
-    const payload = {
-      username: input.username,
-      password: input.password || 'Premier@123',
-      fullName: input.fullName,
-      email: input.email,
-      phone: input.phone,
-      companyId: input.companyId || 1,
-      departmentId: input.departmentId || 1,
-      roleIds: input.roleIds || [1]
-    };
+  const payload: Record<string, any> = {
+    username: input.username,
+    fullName: input.fullName,
+    password: input.password
+  };
 
-    const res = await apiClient.post<ApiEnvelope<any> | any>(ENDPOINTS.IDENTITY.USERS, payload);
-    const created = (res && res.data) || res;
-
-    return {
-      id: created.id || Date.now(),
-      username: created.username || input.username,
-      fullName: created.fullName || input.fullName,
-      email: created.email || input.email || `${input.username}@premiernuts.vn`,
-      phone: created.phone,
-      status: created.status || 'ACTIVE',
-      department: input.department || 'Ban Nghiệp Vụ',
-      roles: created.roles || [input.role || 'ROLE_KHO'],
-      role: input.role || 'ROLE_KHO',
-      createdAt: created.createdAt || new Date().toISOString()
-    };
-  } catch (error) {
-    console.warn('[IdentityApi] Backend create user failed, creating local session user:', error);
-    const fallbackUser: User = {
-      id: Date.now(),
-      username: input.username,
-      fullName: input.fullName,
-      email: input.email || `${input.username}@premiernuts.vn`,
-      status: 'ACTIVE',
-      department: input.department || 'Ban Nghiệp Vụ',
-      roles: [input.role || 'ROLE_KHO'],
-      role: input.role || 'ROLE_KHO',
-      createdAt: new Date().toISOString()
-    };
-    mockUsers.unshift(fallbackUser);
-    return fallbackUser;
+  if (input.email) {
+    payload.email = input.email;
   }
+  if (input.phone) {
+    payload.phone = input.phone;
+  }
+  if (input.departmentId) {
+    payload.departmentId = input.departmentId;
+  }
+  if (input.roleIds && input.roleIds.length > 0) {
+    payload.roleIds = input.roleIds;
+  }
+  if (input.companyId) {
+    payload.companyId = input.companyId;
+  }
+
+  const res = await apiClient.post<ApiEnvelope<any> | any>(ENDPOINTS.IDENTITY.USERS, payload);
+  let created = res;
+  if (res && res.data) {
+    created = res.data;
+  }
+
+  let primaryRole = 'Nhân Viên';
+  if (created.roles && Array.isArray(created.roles) && created.roles.length > 0) {
+    primaryRole = created.roles[0];
+  } else if (input.role) {
+    primaryRole = input.role;
+  }
+
+  let deptName = '';
+  if (created.departmentName) {
+    deptName = created.departmentName;
+  } else if (input.department) {
+    deptName = input.department;
+  }
+
+  return {
+    id: created.id,
+    username: created.username,
+    fullName: created.fullName,
+    email: created.email || '',
+    phone: created.phone,
+    avatarUrl: created.avatarUrl,
+    departmentId: created.departmentId,
+    departmentName: deptName,
+    department: deptName,
+    companyId: created.companyId,
+    status: created.status,
+    roles: created.roles || [],
+    role: primaryRole,
+    roleIds: created.roleIds || [],
+    createdAt: created.createdAt,
+    updatedAt: created.updatedAt
+  };
 }

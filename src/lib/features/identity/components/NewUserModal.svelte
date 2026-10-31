@@ -29,6 +29,7 @@
   // Field validation errors
   let usernameError = $state('');
   let fullNameError = $state('');
+  let passwordError = $state('');
   let roleError = $state('');
 
   // Lấy dữ liệu động từ backend (không hardcode)
@@ -83,10 +84,12 @@
     let valid = true;
     usernameError = '';
     fullNameError = '';
+    passwordError = '';
     roleError = '';
 
     const trimmedUser = StringHelper.trim(username);
     const trimmedName = StringHelper.trim(fullName);
+    const trimmedPass = StringHelper.trim(password);
 
     if (StringHelper.isBlank(trimmedUser)) {
       usernameError = 'Vui lòng nhập tên tài khoản';
@@ -98,6 +101,14 @@
 
     if (StringHelper.isBlank(trimmedName)) {
       fullNameError = 'Vui lòng nhập họ và tên nhân viên';
+      valid = false;
+    }
+
+    if (StringHelper.isBlank(trimmedPass)) {
+      passwordError = 'Vui lòng nhập mật khẩu khởi tạo';
+      valid = false;
+    } else if (trimmedPass.length < 6) {
+      passwordError = 'Mật khẩu tối thiểu 6 ký tự';
       valid = false;
     }
 
@@ -128,6 +139,7 @@
     try {
       const trimmedUser = StringHelper.trim(username);
       const trimmedName = StringHelper.trim(fullName);
+      const trimmedPass = StringHelper.trim(password);
       const roleIdNum = Number(selectedRoleId);
       const deptIdNum = Number(selectedDepartmentId);
 
@@ -139,12 +151,22 @@
         assignedRoleIds = [roleIdNum];
       }
 
+      let trimmedEmail: string | undefined = undefined;
+      if (StringHelper.isNotBlank(email)) {
+        trimmedEmail = StringHelper.trim(email);
+      }
+
+      let trimmedPhone: string | undefined = undefined;
+      if (StringHelper.isNotBlank(phone)) {
+        trimmedPhone = StringHelper.trim(phone);
+      }
+
       const created = await createUser({
         username: StringHelper.toLowerCase(trimmedUser),
         fullName: trimmedName,
-        email: StringHelper.trim(email) || `${trimmedUser}@premiernuts.vn`,
-        phone: StringHelper.trim(phone) || undefined,
-        password: StringHelper.trim(password) || 'Premier@123',
+        password: trimmedPass,
+        email: trimmedEmail,
+        phone: trimmedPhone,
         departmentId: deptIdNum || undefined,
         department: targetDept?.name,
         roleIds: assignedRoleIds,
@@ -216,17 +238,22 @@
     </div>
 
     <div class="form-grid">
-      <!-- Email -->
+      <!-- Password -->
       <div class="field-wrap">
-        <label for="new-email" class="field-label">Email công ty</label>
+        <label for="new-password" class="field-label">Mật khẩu khởi tạo <span class="req">*</span></label>
         <input
-          id="new-email"
-          type="email"
+          id="new-password"
+          type="password"
           class="custom-input"
-          placeholder="Ví dụ: a.nguyen@premiernuts.vn"
-          bind:value={email}
+          class:has-error={!!passwordError}
+          placeholder="Tối thiểu 6 ký tự"
+          bind:value={password}
+          oninput={() => (passwordError = '')}
           disabled={submitting}
         />
+        {#if passwordError}
+          <span class="field-error">{passwordError}</span>
+        {/if}
       </div>
 
       <!-- Phone -->
@@ -238,6 +265,21 @@
           class="custom-input"
           placeholder="Ví dụ: 0912345678"
           bind:value={phone}
+          disabled={submitting}
+        />
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <!-- Email -->
+      <div class="field-wrap">
+        <label for="new-email" class="field-label">Email công ty</label>
+        <input
+          id="new-email"
+          type="email"
+          class="custom-input"
+          placeholder="Ví dụ: a.nguyen@premiernuts.vn"
+          bind:value={email}
           disabled={submitting}
         />
       </div>

@@ -1,60 +1,79 @@
-import type { StatMetric, ServiceHealth } from './dashboard.types';
+import type { StatMetric } from './dashboard.types';
+import { getUsers } from '$features/identity';
+import { getDepartments, getRoles, getCompany } from '$features/company';
 
 export async function getDashboardStats(): Promise<StatMetric[]> {
-  return [
-    {
-      id: 'stat-inventory',
-      title: 'Tổng tồn kho hạt',
-      value: '3,200 kg',
-      change: '+14% so với tháng trước',
-      trend: 'up'
-    },
-    {
-      id: 'stat-revenue',
-      title: 'Doanh thu hôm nay',
-      value: '48.5 tr',
-      change: '+8.2% tuần này',
-      trend: 'up'
-    },
-    {
-      id: 'stat-orders',
-      title: 'Đơn đang xử lý',
-      value: '24 đơn',
-      change: '3 đơn cần duyệt gấp',
-      trend: 'down'
-    },
-    {
-      id: 'stat-qc',
-      title: 'Tỷ lệ kiểm định đạt',
-      value: '99.4%',
-      change: 'Đạt chuẩn xuất khẩu ISO',
-      trend: 'up'
-    }
-  ];
-}
+  try {
+    const [users, departments, roles, company] = await Promise.all([
+      getUsers(),
+      getDepartments(),
+      getRoles(),
+      getCompany()
+    ]);
 
-export async function getServicesHealth(): Promise<ServiceHealth[]> {
-  return [
-    {
-      name: 'Spring Cloud API Gateway',
-      serviceId: 'pn-api-gateway',
-      port: 9000,
-      status: 'UP',
-      uptime: '99.98%'
-    },
-    {
-      name: 'Identity & Authentication Service',
-      serviceId: 'pn-identity',
-      port: 9001,
-      status: 'UP',
-      uptime: '99.95%'
-    },
-    {
-      name: 'Premier Nuts Svelte ERP Frontend',
-      serviceId: 'pn-fe-erp',
-      port: 5173,
-      status: 'UP',
-      uptime: '100%'
-    }
-  ];
+    const activeUsersCount = users.filter((u) => u.status === 'ACTIVE').length;
+
+    return [
+      {
+        id: 'stat-users',
+        title: 'Nhân sự hệ thống',
+        value: `${users.length} tài khoản`,
+        change: `${activeUsersCount} tài khoản đang hoạt động`,
+        trend: 'up'
+      },
+      {
+        id: 'stat-departments',
+        title: 'Phòng ban trực thuộc',
+        value: `${departments.length} phòng ban`,
+        change: 'Cơ cấu phòng ban chuẩn',
+        trend: 'neutral'
+      },
+      {
+        id: 'stat-roles',
+        title: 'Vai trò phân quyền',
+        value: `${roles.length} vai trò`,
+        change: 'Phân quyền RBAC chuẩn',
+        trend: 'neutral'
+      },
+      {
+        id: 'stat-company',
+        title: 'Pháp nhân doanh nghiệp',
+        value: company?.code || 'PREMIER_NUTS',
+        change: `MST: ${company?.taxCode || '—'}`,
+        trend: 'up'
+      }
+    ];
+  } catch (error) {
+    console.warn('[DashboardApi] Could not fetch live dashboard stats:', error);
+    return [
+      {
+        id: 'stat-users',
+        title: 'Nhân sự hệ thống',
+        value: 'Chưa có dữ liệu',
+        change: 'Kết nối qua Gateway :9000',
+        trend: 'neutral'
+      },
+      {
+        id: 'stat-departments',
+        title: 'Phòng ban trực thuộc',
+        value: 'Chưa có dữ liệu',
+        change: 'Kết nối qua Gateway :9000',
+        trend: 'neutral'
+      },
+      {
+        id: 'stat-roles',
+        title: 'Vai trò phân quyền',
+        value: 'Chưa có dữ liệu',
+        change: 'Kết nối qua Gateway :9000',
+        trend: 'neutral'
+      },
+      {
+        id: 'stat-company',
+        title: 'Pháp nhân doanh nghiệp',
+        value: 'PREMIER_NUTS',
+        change: 'Kết nối qua Gateway :9000',
+        trend: 'neutral'
+      }
+    ];
+  }
 }
