@@ -3,7 +3,7 @@
   import { authStore } from '$core/stores';
   import { StringHelper } from '$core/utils';
   import { login } from '$features/auth';
-  import { toast } from '$ui';
+  import { Button, toast } from '$ui';
 
   let username = $state('admin');
   let password = $state('admin123');
@@ -66,17 +66,17 @@
 
 <div class="login-page">
   <div class="login-card">
-    <!-- Header -->
+    <!-- Header đồng bộ thương hiệu Premier Nuts -->
     <div class="login-header">
       <div class="brand-logo">
         <span class="logo-mark">PN</span>
-        <span class="logo-text">PREMIER NUTS</span>
+        <span class="logo-text">PREMIER NUTS ERP</span>
       </div>
-      <h1 class="login-title">Đăng nhập hệ thống</h1>
-      <p class="login-desc">Hệ thống quản lý nguồn lực doanh nghiệp ERP</p>
+      <h1 class="login-title">Đăng Nhập Hệ Thống</h1>
+      <p class="login-desc">Hệ thống quản lý nguồn lực doanh nghiệp</p>
     </div>
 
-    <!-- Error Alert -->
+    <!-- Error Alert Banner -->
     {#if errorMessage}
       <div class="alert-error" role="alert">
         <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
@@ -94,7 +94,7 @@
           id="username"
           type="text"
           class="form-input"
-          placeholder="Tên tài khoản"
+          placeholder="Nhập tên tài khoản (vd: admin)"
           bind:value={username}
           autocomplete="username"
           disabled={loading}
@@ -117,7 +117,7 @@
           id="password"
           type={showPassword ? 'text' : 'password'}
           class="form-input"
-          placeholder="Mật khẩu truy cập"
+          placeholder="Nhập mật khẩu"
           bind:value={password}
           autocomplete="current-password"
           disabled={loading}
@@ -143,18 +143,16 @@
         </button>
       </div>
 
-      <button
+      <Button
+        variant="primary"
+        size="md"
         type="submit"
-        class="btn-submit"
         disabled={loading}
+        {loading}
+        class="btn-submit-full"
       >
-        {#if loading}
-          <span class="spinner"></span>
-          Đang đăng nhập...
-        {:else}
-          Đăng nhập
-        {/if}
-      </button>
+        Đăng nhập vào hệ thống
+      </Button>
     </form>
 
     <!-- Demo Fill Box -->
@@ -165,14 +163,17 @@
         class="demo-chip"
         onclick={() => fillDemoAccount('admin', 'admin123')}
       >
-        admin / admin123
+        <strong>admin</strong> / admin123
       </button>
     </div>
 
     <!-- Footer -->
     <div class="login-footer">
-      <span class="gateway-text">API Gateway :9000 • Identity Service :9001</span>
-      <p class="copyright">© 2026 Premier Nuts ERP. All rights reserved.</p>
+      <div class="gateway-status">
+        <span class="status-dot"></span>
+        API Gateway :9000 • Identity :9001
+      </div>
+      <p class="copyright">© 2026 Premier Nuts Co., Ltd. Tất cả quyền được bảo lưu.</p>
     </div>
   </div>
 </div>
@@ -183,20 +184,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8fafc;
+    background-color: var(--pn-cream, #FFFBF4);
     padding: 24px;
     box-sizing: border-box;
-    font-family: inherit;
+    font-family: var(--pn-font-family, inherit);
   }
 
   .login-card {
     width: 100%;
     max-width: 420px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    background-color: var(--pn-paper, #FFFFFF);
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: var(--pn-radius-lg, 10px);
     padding: 36px 32px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    box-shadow: var(--pn-shadow-sm, 0 2px 6px -1px rgba(60, 40, 15, 0.08));
     box-sizing: border-box;
   }
 
@@ -214,7 +215,7 @@
   }
 
   .logo-mark {
-    background-color: #0f172a;
+    background-color: var(--pn-orange, #F0821E);
     color: #ffffff;
     font-size: 11px;
     font-weight: 800;
@@ -225,23 +226,23 @@
 
   .logo-text {
     font-size: 13px;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 800;
+    color: var(--pn-ink, #2B2116);
     letter-spacing: 0.08em;
   }
 
   .login-title {
     margin: 0 0 6px;
     font-size: 22px;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 800;
+    color: var(--pn-ink, #2B2116);
     letter-spacing: -0.01em;
   }
 
   .login-desc {
     margin: 0;
     font-size: 13px;
-    color: #64748b;
+    color: var(--pn-ink-soft, #6B5D4F);
   }
 
   /* Alert */
@@ -249,12 +250,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
+    background-color: var(--pn-error-bg, #FDF2F2);
+    border: 1px solid var(--pn-error-border, #E08484);
+    color: var(--pn-error, #B92C2C);
     font-size: 13px;
     padding: 10px 14px;
-    border-radius: 6px;
+    border-radius: var(--pn-radius, 6px);
     margin-bottom: 20px;
   }
 
@@ -278,7 +279,7 @@
   .form-label {
     font-size: 13px;
     font-weight: 600;
-    color: #334155;
+    color: var(--pn-ink, #2B2116);
   }
 
   .label-with-action {
@@ -292,38 +293,41 @@
     border: none;
     padding: 0;
     font-size: 12px;
-    color: #2563eb;
+    color: var(--pn-orange, #F0821E);
+    font-weight: 600;
     cursor: pointer;
   }
 
   .toggle-pass-link:hover {
+    color: var(--pn-orange-hover, #D96A0F);
     text-decoration: underline;
   }
 
   .form-input {
     width: 100%;
     box-sizing: border-box;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    background-color: var(--pn-paper, #FFFFFF);
+    border: 1px solid var(--pn-line-dark, #D6C5B3);
+    border-radius: var(--pn-radius, 6px);
     padding: 10px 13px;
     font-size: 14px;
-    color: #0f172a;
+    color: var(--pn-ink, #2B2116);
     outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font-family: inherit;
+    transition: border-color var(--pn-transition, 0.2s), box-shadow var(--pn-transition, 0.2s);
   }
 
   .form-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: var(--pn-orange, #F0821E);
+    box-shadow: 0 0 0 3px rgba(240, 130, 30, 0.16);
   }
 
   .form-input::placeholder {
-    color: #94a3b8;
+    color: var(--pn-ink-light, #9B8D80);
   }
 
   .form-input:disabled {
-    background-color: #f1f5f9;
+    background-color: var(--pn-sidebar-bg, #FDF9F2);
     cursor: not-allowed;
   }
 
@@ -340,7 +344,7 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    color: #475569;
+    color: var(--pn-ink-soft, #6B5D4F);
     cursor: pointer;
     user-select: none;
   }
@@ -348,7 +352,7 @@
   .checkbox-input {
     width: 15px;
     height: 15px;
-    accent-color: #0f172a;
+    accent-color: var(--pn-orange, #F0821E);
     cursor: pointer;
   }
 
@@ -357,60 +361,28 @@
     border: none;
     padding: 0;
     font-size: 13px;
-    color: #2563eb;
+    color: var(--pn-ink-soft, #6B5D4F);
     cursor: pointer;
   }
 
   .link-forgot:hover {
+    color: var(--pn-orange, #F0821E);
     text-decoration: underline;
   }
 
-  /* Submit Button */
-  .btn-submit {
+  /* Submit Button full width */
+  :global(.btn-submit-full) {
     width: 100%;
-    background-color: #0f172a;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    padding: 11px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
     margin-top: 6px;
-    transition: background-color 0.15s ease;
-  }
-
-  .btn-submit:hover:not(:disabled) {
-    background-color: #1e293b;
-  }
-
-  .btn-submit:active:not(:disabled) {
-    background-color: #334155;
-  }
-
-  .btn-submit:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
+    padding: 11px 16px !important;
+    font-size: 14.5px !important;
   }
 
   /* Demo Chip */
   .demo-box {
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--pn-line, #EEE3D3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -419,25 +391,24 @@
 
   .demo-title {
     font-size: 12px;
-    color: #64748b;
+    color: var(--pn-ink-soft, #6B5D4F);
   }
 
   .demo-chip {
-    background-color: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    color: #334155;
-    padding: 3px 8px;
+    background-color: var(--pn-orange-mist, #FFF5EA);
+    border: 1px solid var(--pn-orange-light, #FDEBD3);
+    border-radius: var(--pn-radius-sm, 4px);
+    color: var(--pn-ink, #2B2116);
+    padding: 4px 10px;
     font-size: 12px;
-    font-family: monospace;
-    font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--pn-transition, 0.2s);
   }
 
   .demo-chip:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
+    background-color: var(--pn-orange-light, #FDEBD3);
+    border-color: var(--pn-orange, #F0821E);
   }
 
   /* Footer */
@@ -446,22 +417,30 @@
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   }
 
-  .gateway-text {
+  .gateway-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--pn-ink-soft, #6B5D4F);
     font-family: monospace;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 5px #10b981;
   }
 
   .copyright {
     margin: 0;
     font-size: 11px;
-    color: #94a3b8;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+    color: var(--pn-ink-light, #9B8D80);
   }
 </style>
