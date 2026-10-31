@@ -24,10 +24,10 @@ export async function getDashboardStats(): Promise<StatMetric[]> {
       trend: 'down'
     },
     {
-      id: 'stat-cluster',
-      title: 'Cụm Microservices',
-      value: '3 / 3 Hoạt động',
-      change: 'Gateway, Identity, Frontend',
+      id: 'stat-qc',
+      title: 'Tỷ lệ kiểm định đạt',
+      value: '99.4%',
+      change: 'Đạt chuẩn xuất khẩu ISO',
       trend: 'up'
     }
   ];

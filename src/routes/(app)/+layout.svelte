@@ -39,7 +39,7 @@
     <header class="top-header">
       <div class="header-status">
         <span class="live-dot"></span>
-        <span class="status-text">Cụm API Gateway :9000 & Identity :9001 Sẵn sàng</span>
+        <span class="status-text">Hệ thống đang hoạt động</span>
       </div>
 
       <div class="header-actions">

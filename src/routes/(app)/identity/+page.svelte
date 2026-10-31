@@ -35,8 +35,8 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={() => toast.info('Đang đồng bộ danh sách quyền từ pn-identity (:9001)...')}>
-      Đồng bộ quyền
+    <Button variant="secondary" onclick={() => toast.info('Đang làm mới danh sách tài khoản...')}>
+      Làm mới danh sách
     </Button>
     <Button variant="primary" onclick={() => (isModalOpen = true)}>
       + Cấp tài khoản mới
@@ -44,11 +44,7 @@
   {/snippet}
 </PageHeader>
 
-<Callout variant="info" title="Microservice Identity (Spring Boot pn-identity)">
-  Phân hệ này liên kết trực tiếp với backend <code>pn-identity</code> chạy trên cổng <code>9001</code> qua <code>pn-api-gateway</code> (cổng <code>9000</code>). Hệ thống hỗ trợ xác thực JWT và phân quyền chi tiết cho Ban giám đốc, Thủ kho, Kế toán và Quản đốc nhà máy.
-</Callout>
-
-<Card accent="orange" style="margin-top: 18px;">
+<Card accent="orange">
   <div class="table-header">
     <div>
       <h3>Danh sách nhân sự & quyền hạn</h3>
@@ -86,14 +82,5 @@
     margin: 0;
     font-size: 13px;
     color: var(--pn-ink-soft);
-  }
-
-  code {
-    background: var(--pn-orange-light);
-    color: var(--pn-orange-hover);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 12px;
   }
 </style>
