@@ -8,15 +8,16 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
     ]
   },
   {
-    heading: 'KHO & NGUYÊN LIỆU',
+    heading: 'DOANH NGHIỆP',
     items: [
-      { label: 'Kho hạt & Nguyên liệu', href: '/kho' }
+      { label: 'Thông tin Doanh nghiệp', href: '/company' }
     ]
   },
   {
-    heading: 'HỆ THỐNG',
+    heading: 'HỆ THỐNG & ĐỊNH DANH',
     items: [
-      { label: 'Tài khoản & Phân quyền', href: '/identity' }
+      { label: 'Quản lý Người dùng (Users)', href: '/identity' },
+      { label: 'Giám sát Hệ thống (Healthcheck)', href: '/health' }
     ]
   }
 ];
