@@ -17,10 +17,13 @@
   let isModalOpen = $state(false);
   let loading = $state(true);
 
-  async function loadUsers() {
+  async function loadUsers(isManual = false) {
     loading = true;
     try {
       users = await getUsers();
+      if (isManual) {
+        toast.success('Đã cập nhật danh sách người dùng mới nhất!');
+      }
     } catch (err: any) {
       toast.error('Lỗi khi tải danh sách người dùng: ' + (err.message || 'Lỗi kết nối'));
     } finally {
@@ -29,7 +32,7 @@
   }
 
   $effect(() => {
-    loadUsers();
+    loadUsers(false);
   });
 
   function handleUserCreated(newUser: User) {
@@ -51,7 +54,7 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={loadUsers} disabled={loading}>
+    <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
       {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
     </Button>
     <!-- Phân quyền chức năng: Chỉ hiển thị nút thêm nếu có quyền USER_MANAGE hoặc là Admin -->

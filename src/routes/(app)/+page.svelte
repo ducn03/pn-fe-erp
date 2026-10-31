@@ -18,10 +18,32 @@
   let batches = $state<ProductBatch[]>([]);
   let isNewBatchModalOpen = $state(false);
 
+  let refreshing = $state(false);
+
+  async function loadDashboardData(isManual = false) {
+    if (isManual) refreshing = true;
+    try {
+      const [statsData, batchesData] = await Promise.all([
+        getDashboardStats(),
+        getInventoryBatches()
+      ]);
+      metrics = statsData;
+      batches = batchesData;
+      if (isManual) {
+        toast.success('Đã cập nhật dữ liệu tổng quan mới nhất!');
+      }
+    } catch (err: any) {
+      if (isManual) {
+        toast.error('Lỗi khi làm mới dữ liệu: ' + (err.message || 'Lỗi kết nối'));
+      }
+    } finally {
+      if (isManual) refreshing = false;
+    }
+  }
+
   // Load initial data
   $effect(() => {
-    getDashboardStats().then((data) => (metrics = data));
-    getInventoryBatches().then((data) => (batches = data));
+    loadDashboardData(false);
   });
 
   function handleBatchCreated(newBatch: ProductBatch) {
@@ -41,9 +63,10 @@
   {#snippet actions()}
     <Button
       variant="secondary"
-      onclick={() => toast.info('Đang làm mới dữ liệu tổng quan...')}
+      onclick={() => loadDashboardData(true)}
+      disabled={refreshing}
     >
-      Làm mới dữ liệu
+      {#if refreshing}Đang làm mới...{:else}Làm mới dữ liệu{/if}
     </Button>
     <Button
       variant="primary"

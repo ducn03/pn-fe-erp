@@ -20,7 +20,7 @@
   let roles = $state<Role[]>([]);
   let loading = $state(true);
 
-  async function loadData() {
+  async function loadData(isManual = false) {
     loading = true;
     try {
       const [compData, deptData, roleData] = await Promise.all([
@@ -31,6 +31,9 @@
       company = compData;
       departments = deptData;
       roles = roleData;
+      if (isManual) {
+        toast.success('Đã cập nhật dữ liệu doanh nghiệp mới nhất!');
+      }
     } catch (err: any) {
       toast.error('Không thể tải dữ liệu doanh nghiệp: ' + (err.message || 'Lỗi kết nối'));
     } finally {
@@ -39,7 +42,7 @@
   }
 
   $effect(() => {
-    loadData();
+    loadData(false);
   });
 </script>
 
@@ -57,7 +60,7 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={loadData} disabled={loading}>
+    <Button variant="secondary" onclick={() => loadData(true)} disabled={loading}>
       {#if loading}Đang làm mới...{:else}Làm mới dữ liệu{/if}
     </Button>
   {/snippet}
