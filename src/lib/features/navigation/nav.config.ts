@@ -19,9 +19,7 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
   {
     heading: 'HỆ THỐNG & ĐỊNH DANH',
     items: [
-      { label: 'Tài khoản & Phân quyền', href: '/identity' },
-      { label: 'Cụm Microservices Gateway', href: '/gateway' },
-      { label: 'Kiểm tra trang lỗi (404, 500)', href: '/error-demo' }
+      { label: 'Tài khoản & Phân quyền', href: '/identity' }
     ]
   }
 ];

@@ -38,8 +38,8 @@
           tip: 'Cụm dịch vụ pn-api-gateway hoặc các microservices vệ tinh có thể đang khởi động lại hoặc mất kết nối.',
           actionPrimary: 'Tải lại trang (Reload)',
           actionPrimaryHref: 'reload',
-          actionSecondary: 'Kiểm tra Cụm Gateway (:9000)',
-          actionSecondaryHref: '/gateway'
+          actionSecondary: 'Đến Quản trị Tài khoản',
+          actionSecondaryHref: '/identity'
         };
       case 502:
       case 503:
@@ -51,8 +51,8 @@
           tip: 'Hãy đảm bảo tiến trình backend đang chạy và cổng mạng nội bộ không bị chặn tường lửa.',
           actionPrimary: 'Tải lại trang',
           actionPrimaryHref: 'reload',
-          actionSecondary: 'Kiểm tra Cụm Gateway',
-          actionSecondaryHref: '/gateway'
+          actionSecondary: 'Về Bàn làm việc',
+          actionSecondaryHref: '/'
         };
       default:
         return {
@@ -62,8 +62,8 @@
           tip: 'Vui lòng quay lại màn hình chính hoặc thử tải lại trang sau ít phút.',
           actionPrimary: 'Về Bàn làm việc',
           actionPrimaryHref: '/',
-          actionSecondary: 'Kiểm tra Cụm Gateway',
-          actionSecondaryHref: '/gateway'
+          actionSecondary: 'Đến Kho hạt & Nguyên liệu',
+          actionSecondaryHref: '/kho'
         };
     }
   });
