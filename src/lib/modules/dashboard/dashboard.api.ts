@@ -1,0 +1,61 @@
+import type { StatMetric, ServiceHealth } from './dashboard.types';
+
+export async function getDashboardStats(): Promise<StatMetric[]> {
+  // In production, fetch via apiClient.get('/api/v1/dashboard/stats')
+  return [
+    {
+      id: 'stat-inventory',
+      title: 'Tổng tồn kho hạt',
+      value: '3,200 kg',
+      change: '+14% so với tháng trước',
+      trend: 'up'
+    },
+    {
+      id: 'stat-revenue',
+      title: 'Doanh thu hôm nay',
+      value: '48.5 tr',
+      change: '+8.2% tuần này',
+      trend: 'up'
+    },
+    {
+      id: 'stat-orders',
+      title: 'Đơn đang xử lý',
+      value: '24 đơn',
+      change: '3 đơn cần duyệt gấp',
+      trend: 'down'
+    },
+    {
+      id: 'stat-cluster',
+      title: 'Cụm Microservices',
+      value: '3 / 3 Hoạt động',
+      change: 'Gateway, Identity, Frontend',
+      trend: 'up'
+    }
+  ];
+}
+
+export async function getServicesHealth(): Promise<ServiceHealth[]> {
+  return [
+    {
+      name: 'Spring Cloud API Gateway',
+      serviceId: 'pn-api-gateway',
+      port: 8080,
+      status: 'UP',
+      uptime: '99.98%'
+    },
+    {
+      name: 'Identity & Authentication Service',
+      serviceId: 'pn-identity',
+      port: 8081,
+      status: 'UP',
+      uptime: '99.95%'
+    },
+    {
+      name: 'Premier Nuts Svelte ERP Frontend',
+      serviceId: 'pn-fe-erp',
+      port: 5173,
+      status: 'UP',
+      uptime: '100%'
+    }
+  ];
+}

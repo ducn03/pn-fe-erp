@@ -1,0 +1,312 @@
+/*!
+ * Premier Nuts ERP Design System (Premier UI)
+ * Inspired by premiernuts.vn & BPRO Enterprise UI
+ * License: MIT
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Premier Nuts Brand Palette (from premiernuts.vn) ── */
+  --pn-cream: #FFFBF4;         /* Nền ấm đặc trưng của Premier Nuts */
+  --pn-paper: #FFFFFF;         /* Trắng nền card / modal / form */
+  --pn-ink: #2B2116;           /* Màu chữ nâu đen đậm sang trọng */
+  --pn-ink-soft: #6B5D4F;      /* Màu chữ phụ, caption, subtitle */
+  --pn-ink-light: #9B8D80;     /* Màu chữ mờ / placeholder */
+
+  /* ── Primary Accents (Premier Nuts Orange) ── */
+  --pn-orange: #F0821E;        /* Cam chủ đạo Premier Nuts */
+  --pn-orange-hover: #D96A0F;  /* Cam đậm khi hover / active */
+  --pn-orange-light: #FDEBD3;  /* Cam nhạt / nền badge, highlight */
+  --pn-orange-mist: #FFF5EA;   /* Cam rất nhạt cho hover nền */
+
+  /* ── Secondary / Nature Accents (Premier Nuts Fresh Green) ── */
+  --pn-green: #8FC53E;         /* Xanh lá tự nhiên Premier Nuts */
+  --pn-green-dark: #4F7A26;    /* Xanh lá đậm cho text / viền */
+  --pn-green-mist: #EEF6E2;    /* Nền xanh lá nhạt cho Success */
+
+  /* ── Neutral & Borders ── */
+  --pn-line: #EEE3D3;          /* Viền be kem chuẩn */
+  --pn-line-dark: #D6C5B3;     /* Viền khi focus / hover */
+  --pn-sidebar-bg: #FDF9F2;    /* Nền Sidebar */
+  --pn-card-bg: #FFFFFF;       /* Nền card */
+  --pn-input-bg: #FFFFFF;
+
+  /* ── Status Colors ── */
+  --pn-success: #4F7A26;
+  --pn-success-bg: #EEF6E2;
+  --pn-success-border: #8FC53E;
+
+  --pn-warning: #B36814;
+  --pn-warning-bg: #FFF3E0;
+  --pn-warning-border: #F0821E;
+
+  --pn-error: #B92C2C;
+  --pn-error-bg: #FDF2F2;
+  --pn-error-border: #E08484;
+
+  --pn-info: #216391;
+  --pn-info-bg: #EFF6FB;
+  --pn-info-border: #7AB5DC;
+
+  /* ── Typography & Sizing ── */
+  --pn-font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --pn-font-size: 14px;
+  --pn-line-height: 1.55;
+  --pn-radius: 6px;
+  --pn-radius-sm: 4px;
+  --pn-radius-lg: 10px;
+  --pn-radius-pill: 9999px;
+
+  /* ── Shadows ── */
+  --pn-shadow-sm: 0 2px 6px -1px rgba(60, 40, 15, 0.08);
+  --pn-shadow-md: 0 10px 25px -8px rgba(120, 80, 20, 0.14);
+  --pn-shadow-lg: 0 16px 36px -10px rgba(120, 80, 20, 0.20);
+
+  /* ── Transitions ── */
+  --pn-transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── BPRO Token Aliases (for BPRO compatibility) ── */
+  --bpro-nav: var(--pn-ink);
+  --bpro-blue: var(--pn-orange);
+  --bpro-blue-hover: var(--pn-orange-hover);
+  --bpro-blue-light: var(--pn-orange-light);
+  --bpro-head: var(--pn-ink);
+  --bpro-head-dark: #1E160D;
+  --bpro-accent: #C26610;
+  --bpro-ink: var(--pn-ink);
+  --bpro-ink-light: #4A3B2C;
+  --bpro-muted: var(--pn-ink-soft);
+  --bpro-meta: #7D6E60;
+  --bpro-subtitle: var(--pn-ink-soft);
+  --bpro-caption: #5C4E40;
+  --bpro-link: var(--pn-orange-hover);
+  --bpro-bg: var(--pn-cream);
+  --bpro-paper: var(--pn-paper);
+  --bpro-soft: #F4EFE6;
+  --bpro-soft-alt: #F6F2EA;
+  --bpro-sidebar-bg: var(--pn-sidebar-bg);
+  --bpro-card-bg: var(--pn-card-bg);
+  --bpro-take-bg: #F5EEE4;
+  --bpro-essence-bg: #FFF7E6;
+  --bpro-line: var(--pn-line);
+  --bpro-border: var(--pn-line-dark);
+  --bpro-border-light: #EDE5DA;
+  --bpro-border-dark: #C8BCAC;
+  --bpro-sidebar-border: var(--pn-line);
+  --bpro-card-border: var(--pn-line);
+  --bpro-input-border: var(--pn-line-dark);
+  --bpro-warn-bg: var(--pn-warning-bg);
+  --bpro-warn-border: var(--pn-warning-border);
+  --bpro-warn-essence: var(--pn-orange-light);
+  --bpro-error: var(--pn-error);
+  --bpro-error-text: #962828;
+  --bpro-success: var(--pn-green-dark);
+  --bpro-success-bg: var(--pn-green-mist);
+  --bpro-success-border: var(--pn-green);
+  --bpro-info-bg: var(--pn-info-bg);
+  --bpro-info-border: var(--pn-info-border);
+  --bpro-info-text: var(--pn-info);
+  --bpro-font-family: var(--pn-font-family);
+  --bpro-font-size: 14px;
+  --bpro-line-height: 1.58;
+  --bpro-font-size-sm: 12px;
+  --bpro-font-size-xs: 11px;
+  --bpro-font-size-lg: 16px;
+  --bpro-font-size-xl: 18px;
+  --bpro-font-size-2xl: 20px;
+  --bpro-font-size-3xl: 26px;
+  --bpro-font-size-4xl: 36px;
+  --bpro-space-xs: 4px;
+  --bpro-space-sm: 8px;
+  --bpro-space-md: 12px;
+  --bpro-space-lg: 16px;
+  --bpro-space-xl: 20px;
+  --bpro-space-2xl: 24px;
+  --bpro-sidebar-width: 270px;
+  --bpro-radius: 4px;
+  --bpro-radius-sm: 3px;
+  --bpro-radius-md: 6px;
+  --bpro-shadow-sm: var(--pn-shadow-sm);
+  --bpro-shadow-md: var(--pn-shadow-md);
+  --bpro-shadow-lg: var(--pn-shadow-lg);
+  --bpro-transition: var(--pn-transition);
+}
+
+/* Base resets & typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--pn-font-family);
+  background: var(--pn-cream);
+  color: var(--pn-ink);
+  line-height: var(--pn-line-height);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── PREMIER UI UTILITIES & SHARED STYLES ── */
+
+/* Table styles */
+.pn-table-container,
+.bpro-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--pn-paper);
+  border: 1px solid var(--pn-line);
+  border-radius: var(--pn-radius-lg);
+  box-shadow: var(--pn-shadow-sm);
+}
+
+.pn-table,
+.bpro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.pn-table th,
+.bpro-table th {
+  background: var(--pn-sidebar-bg);
+  color: var(--pn-ink);
+  font-weight: 700;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--pn-line);
+  white-space: nowrap;
+}
+
+.pn-table td,
+.bpro-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--pn-line);
+  color: var(--pn-ink);
+  vertical-align: middle;
+}
+
+.pn-table tr:last-child td,
+.bpro-table tr:last-child td {
+  border-bottom: none;
+}
+
+.pn-table.pn-table--striped tbody tr:nth-child(even),
+.bpro-table tbody tr:nth-child(even) {
+  background: #FCF9F3;
+}
+
+.pn-table.pn-table--hover tbody tr:hover,
+.bpro-table tbody tr:hover {
+  background: var(--pn-orange-mist);
+}
+
+.pn-table.pn-table--compact th,
+.pn-table.pn-table--compact td,
+.bpro-table--compact th,
+.bpro-table--compact td {
+  padding: 8px 12px;
+  font-size: 12.5px;
+}
+
+/* Form inputs */
+.pn-input-group,
+.bpro-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.pn-label,
+.bpro-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pn-ink);
+}
+
+.pn-label .required,
+.bpro-label--required::after {
+  content: ' *';
+  color: var(--pn-error);
+}
+
+.pn-input,
+.pn-select,
+.pn-textarea,
+.bpro-input,
+.bpro-select,
+.bpro-textarea {
+  font-family: var(--pn-font-family);
+  font-size: 14px;
+  padding: 9px 14px;
+  border: 1px solid var(--pn-line-dark);
+  border-radius: var(--pn-radius);
+  background: var(--pn-paper);
+  color: var(--pn-ink);
+  outline: none;
+  transition: all var(--pn-transition);
+}
+
+.pn-input:focus,
+.pn-select:focus,
+.pn-textarea:focus,
+.bpro-input:focus,
+.bpro-select:focus,
+.bpro-textarea:focus {
+  border-color: var(--pn-orange);
+  box-shadow: 0 0 0 3px rgba(240, 130, 30, 0.16);
+}
+
+.pn-input.has-error,
+.bpro-input--error {
+  border-color: var(--pn-error);
+}
+
+.pn-input.has-error:focus,
+.bpro-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(185, 44, 44, 0.16);
+}
+
+.pn-error-msg,
+.bpro-form-error {
+  font-size: 12px;
+  color: var(--pn-error);
+  margin-top: 2px;
+}
+
+.pn-hint,
+.bpro-form-help {
+  font-size: 12px;
+  color: var(--pn-ink-soft);
+}
+
+/* Cards */
+.pn-card,
+.bpro-card {
+  background: var(--pn-paper);
+  border: 1px solid var(--pn-line);
+  border-radius: var(--pn-radius-lg);
+  box-shadow: var(--pn-shadow-sm);
+  padding: 20px 24px;
+  transition: all var(--pn-transition);
+}
+
+.pn-card:hover,
+.bpro-card:hover {
+  border-color: var(--pn-line-dark);
+  box-shadow: var(--pn-shadow-md);
+}
+
+.pn-card--accent-orange {
+  border-top: 4px solid var(--pn-orange);
+}
+
+.pn-card--accent-green {
+  border-top: 4px solid var(--pn-green);
+}
+
+.pn-card--accent-espresso {
+  border-top: 4px solid var(--pn-ink);
+}
