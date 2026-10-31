@@ -63,7 +63,7 @@
   {/snippet}
 </PageHeader>
 
-<!-- Company Overview Card -->
+<!-- 1. Company Overview Card (Full Width) -->
 {#if company}
   <Card accent="orange" style="margin-bottom: 24px;">
     <div class="company-card-header">
@@ -95,25 +95,24 @@
   </Card>
 {/if}
 
-<!-- Two Columns: Departments & Roles -->
-<div class="structure-grid">
-  <!-- Departments Table -->
+<!-- 2. Departments Table (Trải ngang full width, responsive) -->
+<div class="tables-stack">
   <Card accent="orange">
     <div class="section-title-row">
       <div>
         <h3 class="section-title">Phòng Ban & Phân Xưởng</h3>
-        <p class="section-subtitle">Tổng cộng {departments.length} phòng ban trực thuộc</p>
+        <p class="section-subtitle">Tổng cộng {departments.length} phòng ban trực thuộc hệ thống</p>
       </div>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Mã</th>
-            <th>Tên Phòng Ban</th>
+            <th style="width: 140px;">Mã Phòng Ban</th>
+            <th style="width: 260px;">Tên Phòng Ban</th>
             <th>Mô Tả Nhiệm Vụ</th>
-            <th>Trạng Thái</th>
+            <th style="width: 140px; text-align: center;">Trạng Thái</th>
           </tr>
         </thead>
         <tbody>
@@ -122,7 +121,7 @@
               <td><span class="code-tag">{dept.code}</span></td>
               <td class="font-bold">{dept.name}</td>
               <td class="desc-cell">{dept.description}</td>
-              <td>
+              <td style="text-align: center;">
                 <Badge variant="success">Hoạt động</Badge>
               </td>
             </tr>
@@ -136,7 +135,7 @@
     </div>
   </Card>
 
-  <!-- Roles Table -->
+  <!-- 3. Roles Table (Trải ngang full width, responsive) -->
   <Card accent="orange">
     <div class="section-title-row">
       <div>
@@ -145,14 +144,14 @@
       </div>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Mã Vai Trò</th>
-            <th>Tên Vai Trò</th>
+            <th style="width: 180px;">Mã Vai Trò</th>
+            <th style="width: 260px;">Tên Vai Trò</th>
             <th>Phạm Vi Quyền Hạn</th>
-            <th>Trạng Thái</th>
+            <th style="width: 140px; text-align: center;">Trạng Thái</th>
           </tr>
         </thead>
         <tbody>
@@ -161,7 +160,7 @@
               <td><span class="code-tag">{role.code}</span></td>
               <td class="font-bold">{role.name}</td>
               <td class="desc-cell">{role.description}</td>
-              <td>
+              <td style="text-align: center;">
                 <Badge variant="success">Hoạt động</Badge>
               </td>
             </tr>
@@ -223,11 +222,11 @@
   }
 
   .info-label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11.5px;
+    font-weight: 700;
     color: var(--pn-ink-soft, #6B5D4F);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
   }
 
   .info-value {
@@ -240,16 +239,12 @@
     font-family: monospace;
   }
 
-  .structure-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+  /* Bố cục trải ngang toàn diện (Full Width Stack) */
+  .tables-stack {
+    display: flex;
+    flex-direction: column;
     gap: 24px;
-  }
-
-  @media (min-width: 1024px) {
-    .structure-grid {
-      grid-template-columns: 1fr 1fr;
-    }
+    width: 100%;
   }
 
   .section-title-row {
@@ -258,23 +253,29 @@
 
   .section-title {
     margin: 0 0 4px;
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
   }
 
   .section-subtitle {
     margin: 0;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--pn-ink-soft, #6B5D4F);
   }
 
-  .table-wrap {
+  /* Responsive Table Container */
+  .table-responsive {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: var(--pn-radius, 6px);
   }
 
   .data-table {
     width: 100%;
+    min-width: 650px;
     border-collapse: collapse;
     font-size: 13.5px;
     text-align: left;
@@ -284,16 +285,20 @@
     background: var(--pn-sidebar-bg, #FDF9F2);
     color: var(--pn-ink, #2B2116);
     font-weight: 700;
-    padding: 10px 14px;
+    padding: 12px 16px;
     border-bottom: 2px solid var(--pn-line, #EEE3D3);
     white-space: nowrap;
   }
 
   .data-table td {
-    padding: 11px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--pn-line, #EEE3D3);
     color: var(--pn-ink, #2B2116);
     vertical-align: middle;
+  }
+
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
   }
 
   .data-table tbody tr:hover {
@@ -302,13 +307,14 @@
 
   .code-tag {
     font-family: monospace;
-    font-size: 11.5px;
+    font-size: 12px;
     background: var(--pn-sidebar-bg, #FDF9F2);
     border: 1px solid var(--pn-line-dark, #D6C5B3);
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 4px;
     font-weight: 600;
     color: var(--pn-ink, #2B2116);
+    white-space: nowrap;
   }
 
   .font-bold {
@@ -317,12 +323,13 @@
 
   .desc-cell {
     color: var(--pn-ink-soft, #6B5D4F);
-    font-size: 12.5px;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .empty-cell {
     text-align: center;
     color: var(--pn-ink-light, #9B8D80);
-    padding: 24px;
+    padding: 32px;
   }
 </style>

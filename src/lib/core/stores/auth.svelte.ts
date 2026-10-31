@@ -1,5 +1,5 @@
 /**
- * Global Authentication Store powered by Svelte 5 Runes
+ * Global Authentication & Authorization Store powered by Svelte 5 Runes
  */
 import { STORAGE_KEYS } from '../constants/storage.constants';
 
@@ -12,10 +12,27 @@ export interface AuthUser {
   companyId?: number;
 }
 
+// Role to default permissions mapping
+const ROLE_PERMISSIONS: Record<string, string[]> = {
+  SUPER_ADMIN: ['*'],
+  ROLE_ADMIN: ['*'],
+  ROLE_KHO: ['INVENTORY_VIEW', 'INVENTORY_IMPORT', 'INVENTORY_EXPORT', 'COMPANY_VIEW'],
+  ROLE_KE_TOAN: ['FINANCE_VIEW', 'COMPANY_VIEW', 'USER_VIEW'],
+  ROLE_SAN_XUAT: ['MANUFACTURING_VIEW', 'MANUFACTURING_EXECUTE', 'INVENTORY_VIEW', 'COMPANY_VIEW'],
+  ROLE_QC: ['QC_VIEW', 'QC_INSPECT', 'INVENTORY_VIEW', 'COMPANY_VIEW']
+};
+
 class AuthStore {
   user = $state<AuthUser | null>(null);
   token = $state<string | null>(null);
   isAuthenticated = $derived(!!this.token);
+
+  // Quyền Quản trị viên tối cao
+  isAdmin = $derived(
+    !!this.user?.roles?.some(
+      (r) => r === 'ROLE_ADMIN' || r === 'SUPER_ADMIN'
+    )
+  );
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
@@ -66,6 +83,32 @@ class AuthStore {
   hasRole(role: string): boolean {
     if (!this.user || !this.user.roles) return false;
     return this.user.roles.includes(role);
+  }
+
+  /**
+   * Kiểm tra quyền hạn chi tiết (Permission)
+   */
+  hasPermission(permission: string): boolean {
+    if (!this.user || !this.user.roles) return false;
+    if (this.isAdmin) return true;
+
+    for (const r of this.user.roles) {
+      const perms = ROLE_PERMISSIONS[r] || [];
+      if (perms.includes('*') || perms.includes(permission)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Kiểm tra quyền gán vai trò: CHỈ ADMIN MỚI ĐƯỢC GÁN VAI TRÒ ADMIN
+   */
+  canAssignRole(targetRoleCode: string): boolean {
+    if (targetRoleCode === 'ROLE_ADMIN' || targetRoleCode === 'SUPER_ADMIN') {
+      return this.isAdmin;
+    }
+    return this.hasPermission('ROLE_ASSIGN') || this.isAdmin;
   }
 }
 

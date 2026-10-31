@@ -10,6 +10,22 @@
   let activeHref = $derived(page.url.pathname);
   let user = $derived(authStore.user);
 
+  // Phân quyền điều hướng theo quyền hạn (Permission-based Navigation)
+  let allowedNavSections = $derived.by(() => {
+    return ERP_NAV_SECTIONS.map((sec) => ({
+      heading: sec.heading,
+      items: sec.items.filter((item) => {
+        if (item.href === '/identity') {
+          return authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
+        }
+        if (item.href === '/health') {
+          return authStore.isAdmin || authStore.hasPermission('HEALTH_VIEW');
+        }
+        return true;
+      })
+    })).filter((sec) => sec.items.length > 0);
+  });
+
   // Auth Guard: redirect to login if unauthenticated in browser
   $effect(() => {
     if (typeof window !== 'undefined' && !authStore.isAuthenticated) {
@@ -29,7 +45,7 @@
   <Sidebar
     brandName="PREMIER NUTS ERP"
     logoText="PN"
-    sections={ERP_NAV_SECTIONS}
+    sections={allowedNavSections}
     {activeHref}
   />
 

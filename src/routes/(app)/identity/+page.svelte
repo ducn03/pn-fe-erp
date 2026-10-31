@@ -3,9 +3,9 @@
     Button,
     Card,
     PageHeader,
-    Callout,
     toast
   } from '$ui';
+  import { authStore } from '$core/stores';
   import {
     UserTable,
     NewUserModal,
@@ -15,9 +15,21 @@
 
   let users = $state<User[]>([]);
   let isModalOpen = $state(false);
+  let loading = $state(true);
+
+  async function loadUsers() {
+    loading = true;
+    try {
+      users = await getUsers();
+    } catch (err: any) {
+      toast.error('Lỗi khi tải danh sách người dùng: ' + (err.message || 'Lỗi kết nối'));
+    } finally {
+      loading = false;
+    }
+  }
 
   $effect(() => {
-    getUsers().then((data) => (users = data));
+    loadUsers();
   });
 
   function handleUserCreated(newUser: User) {
@@ -25,9 +37,13 @@
   }
 </script>
 
+<svelte:head>
+  <title>Quản Lý Người Dùng & Phân Quyền | Premier Nuts ERP</title>
+</svelte:head>
+
 <PageHeader
-  title="Tài Khoản & Phân Quyền"
-  subtitle="Quản trị nhân sự, vai trò và phân quyền truy cập cụm hệ thống Premier Nuts"
+  title="Quản Lý Tài Khoản & Phân Quyền"
+  subtitle="Quản trị nhân sự, vai trò nghiệp vụ và phân quyền truy cập hệ thống Premier Nuts"
   breadcrumbs={[
     { label: 'Premier Nuts', href: '/' },
     { label: 'Hệ thống' },
@@ -35,33 +51,40 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={() => toast.info('Đang làm mới danh sách tài khoản...')}>
-      Làm mới danh sách
+    <Button variant="secondary" onclick={loadUsers} disabled={loading}>
+      {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
     </Button>
-    <Button variant="primary" onclick={() => (isModalOpen = true)}>
-      + Cấp tài khoản mới
-    </Button>
+    <!-- Phân quyền chức năng: Chỉ hiển thị nút thêm nếu có quyền USER_MANAGE hoặc là Admin -->
+    {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+      <Button variant="primary" onclick={() => (isModalOpen = true)}>
+        + Cấp tài khoản mới
+      </Button>
+    {/if}
   {/snippet}
 </PageHeader>
 
 <Card accent="orange">
   <div class="table-header">
     <div>
-      <h3>Danh sách nhân sự & quyền hạn</h3>
+      <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
       <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
     </div>
-    <Button variant="outline" size="sm" onclick={() => (isModalOpen = true)}>
-      + Thêm người dùng
-    </Button>
+    {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+      <Button variant="outline" size="sm" onclick={() => (isModalOpen = true)}>
+        + Thêm người dùng
+      </Button>
+    {/if}
   </div>
 
   <UserTable {users} />
 </Card>
 
-<NewUserModal
-  bind:open={isModalOpen}
-  oncreated={handleUserCreated}
-/>
+{#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+  <NewUserModal
+    bind:open={isModalOpen}
+    oncreated={handleUserCreated}
+  />
+{/if}
 
 <style>
   .table-header {
@@ -69,18 +92,20 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .table-header h3 {
+  .table-title {
     margin: 0 0 4px;
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 700;
-    color: var(--pn-ink);
+    color: var(--pn-ink, #2B2116);
   }
 
   .text-muted {
     margin: 0;
     font-size: 13px;
-    color: var(--pn-ink-soft);
+    color: var(--pn-ink-soft, #6B5D4F);
   }
 </style>
