@@ -155,3 +155,52 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     updatedAt: created.updatedAt
   };
 }
+
+export async function generateUsername(fullName: string): Promise<string> {
+  const res = await apiClient.get<ApiEnvelope<string> | string>('/api/v1/users/generate-username', {
+    fullName
+  });
+  return (res as any)?.data || res || '';
+}
+
+export async function updateUser(id: number | string, input: any): Promise<User> {
+  const res = await apiClient.put<ApiEnvelope<any> | any>(`/api/v1/users/${id}`, input);
+  const updated = (res as any)?.data || res;
+  return updated;
+}
+
+export async function getLoginLogs(params?: any): Promise<{ items: any[]; total: number }> {
+  const queryParams: Record<string, any> = {
+    page: params?.page ?? 1,
+    size: params?.size ?? 20
+  };
+  if (params?.username) {
+    queryParams.username = params.username;
+  }
+  if (params?.status) {
+    queryParams.status = params.status;
+  }
+  if (params?.keyword) {
+    queryParams.keyword = params.keyword;
+  }
+
+  const res = await apiClient.get<ApiEnvelope<any> | any>('/api/v1/logs/login', queryParams);
+  let items: any[] = [];
+  let total = 0;
+
+  if (res && res.data) {
+    if (Array.isArray(res.data.content)) {
+      items = res.data.content;
+      total = res.data.totalElements || items.length;
+    } else if (Array.isArray(res.data)) {
+      items = res.data;
+      total = res.paging?.totalElements || items.length;
+    }
+  } else if (Array.isArray(res)) {
+    items = res;
+    total = items.length;
+  }
+
+  return { items, total };
+}
+

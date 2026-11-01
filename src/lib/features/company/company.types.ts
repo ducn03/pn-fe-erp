@@ -6,7 +6,17 @@ export interface Company {
   address: string;
   phone: string;
   email: string;
+  website?: string;
   status: string;
+}
+
+export interface UpdateCompanyInput {
+  name: string;
+  taxCode?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
 }
 
 export interface Department {

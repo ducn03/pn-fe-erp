@@ -5,16 +5,17 @@
     PageHeader,
     toast
   } from '$ui';
+  import { goto } from '$app/navigation';
   import { authStore } from '$core/stores';
   import {
     UserTable,
-    NewUserModal,
+    RoleTemplateManager,
     getUsers,
     type User
   } from '$features/identity';
 
+  let activeTab = $state<'users' | 'templates'>('users');
   let users = $state<User[]>([]);
-  let isModalOpen = $state(false);
   let loading = $state(true);
 
   async function loadUsers(isManual = false) {
@@ -34,10 +35,6 @@
   $effect(() => {
     loadUsers(false);
   });
-
-  function handleUserCreated(newUser: User) {
-    users = [newUser, ...users];
-  }
 </script>
 
 <svelte:head>
@@ -54,42 +51,98 @@
   ]}
 >
   {#snippet actions()}
-    <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
-      {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
-    </Button>
-    <!-- Phân quyền chức năng: Chỉ hiển thị nút thêm nếu có quyền USER_MANAGE hoặc là Admin -->
-    {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
-      <Button variant="primary" onclick={() => (isModalOpen = true)}>
-        + Cấp tài khoản mới
+    {#if activeTab === 'users'}
+      <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
+        {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
       </Button>
+      {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+        <Button variant="primary" onclick={() => goto('/identity/create')}>
+          + Cấp tài khoản mới
+        </Button>
+      {/if}
     {/if}
   {/snippet}
 </PageHeader>
 
-<Card accent="orange">
-  <div class="table-header">
-    <div>
-      <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
-      <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
+<!-- Navigation Tabs -->
+<div class="tabs-nav-bar">
+  <button
+    type="button"
+    class="tab-nav-item"
+    class:active={activeTab === 'users'}
+    onclick={() => (activeTab = 'users')}
+  >
+    👤 Danh Sách Nhân Sự & Tài Khoản ({users.length})
+  </button>
+  <button
+    type="button"
+    class="tab-nav-item"
+    class:active={activeTab === 'templates'}
+    onclick={() => (activeTab = 'templates')}
+  >
+    🛡️ Khuôn Mẫu Phân Quyền Vai Trò (Role Templates)
+  </button>
+</div>
+
+{#if activeTab === 'users'}
+  <Card accent="orange">
+    <div class="table-header">
+      <div>
+        <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
+        <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
+      </div>
+      {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+        <Button variant="primary" size="sm" onclick={() => goto('/identity/create')}>
+          + Thêm nhân sự mới
+        </Button>
+      {/if}
     </div>
-    {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
-      <Button variant="outline" size="sm" onclick={() => (isModalOpen = true)}>
-        + Thêm người dùng
-      </Button>
-    {/if}
-  </div>
 
-  <UserTable {users} />
-</Card>
-
-{#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
-  <NewUserModal
-    bind:open={isModalOpen}
-    oncreated={handleUserCreated}
-  />
+    <UserTable bind:users />
+  </Card>
+{:else if activeTab === 'templates'}
+  <RoleTemplateManager />
 {/if}
 
 <style>
+  .tabs-nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--pn-border, #E8DFD8);
+    padding-bottom: 2px;
+  }
+
+  .tab-nav-item {
+    background: transparent;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pn-ink-soft, #6B5D4F);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -4px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-nav-item:hover {
+    color: var(--pn-brand, #D96B27);
+    background: rgba(217, 107, 39, 0.05);
+  }
+
+  .tab-nav-item.active {
+    color: var(--pn-brand, #D96B27);
+    border-bottom-color: var(--pn-brand, #D96B27);
+    font-weight: 700;
+    background: rgba(217, 107, 39, 0.08);
+  }
+
   .table-header {
     display: flex;
     justify-content: space-between;

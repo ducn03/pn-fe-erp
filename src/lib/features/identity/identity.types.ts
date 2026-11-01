@@ -44,7 +44,7 @@ export interface User {
 }
 
 export interface CreateUserInput {
-  username: string;
+  username?: string;
   password?: string;
   fullName: string;
   email?: string;
@@ -66,3 +66,35 @@ export interface UserListParams {
   page?: number;
   size?: number;
 }
+
+export interface UpdateUserInput {
+  username?: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  departmentId?: number;
+  roleId?: number;
+  roleIds?: number[];
+  permissionIds?: number[];
+  avatarUrl?: string;
+}
+
+export interface LoginLogItem {
+  id: number;
+  userId?: number;
+  username: string;
+  ipAddress?: string;
+  userAgent?: string;
+  failureReason?: string;
+  status: 'SUCCESS' | 'FAILED' | string;
+  createdAt: string;
+}
+
+export interface LogSearchParams {
+  username?: string;
+  status?: string;
+  keyword?: string;
+  page?: number;
+  size?: number;
+}
+

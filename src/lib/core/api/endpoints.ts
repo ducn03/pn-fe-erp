@@ -43,9 +43,13 @@ export const ENDPOINTS = {
     REFRESH: '/api/v1/auth/refresh',
     ME: '/api/v1/auth/me',
     USERS: '/api/v1/users',
+    GENERATE_USERNAME: '/api/v1/users/generate-username',
     CHECK_USERNAME: '/api/v1/users/check-username',
     CHECK_EMAIL: '/api/v1/users/check-email',
-    COMPANIES: '/api/v1/companies'
+    COMPANY: '/api/v1/company',
+    COMPANIES: '/api/v1/companies',
+    ROLES_PERMISSIONS: (roleId: number | string) => `/api/v1/roles/${roleId}/permissions`,
+    LOGS_LOGIN: '/api/v1/logs/login'
   },
   // pn-inventory Service
   INVENTORY: {

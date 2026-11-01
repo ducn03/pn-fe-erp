@@ -4,12 +4,16 @@
     Card,
     Badge,
     Button,
+    Modal,
+    Input,
     toast,
     CARD_ACCENTS,
     BADGE_VARIANTS
   } from '$ui';
+  import { authStore } from '$core/stores';
   import {
     getCompany,
+    updateCompany,
     getDepartments,
     getRoles,
     type Company,
@@ -23,11 +27,70 @@
   let roles = $state<Role[]>([]);
   let loading = $state(true);
 
+  // Edit Company State
+  let isEditModalOpen = $state(false);
+  let isSubmitting = $state(false);
+  let editForm = $state({
+    name: '',
+    taxCode: '',
+    phone: '',
+    email: '',
+    address: '',
+    website: ''
+  });
+  let formErrors = $state<Record<string, string>>({});
+
   function formatField(value: string | null | undefined): string {
     if (value && value.trim().length > 0) {
       return value;
     }
     return UI_CONSTANTS.EMPTY_PLACEHOLDER;
+  }
+
+  function openEditCompanyModal() {
+    if (!company) {
+      return;
+    }
+    editForm = {
+      name: company.name || '',
+      taxCode: company.taxCode || '',
+      phone: company.phone || '',
+      email: company.email || '',
+      address: company.address || '',
+      website: company.website || ''
+    };
+    formErrors = {};
+    isEditModalOpen = true;
+  }
+
+  async function handleSaveCompany() {
+    formErrors = {};
+    if (!editForm.name.trim()) {
+      formErrors.name = 'Tên công ty không được để trống';
+    }
+
+    if (Object.keys(formErrors).length > 0) {
+      return;
+    }
+
+    isSubmitting = true;
+    try {
+      const updated = await updateCompany({
+        name: editForm.name.trim(),
+        taxCode: editForm.taxCode.trim(),
+        phone: editForm.phone.trim(),
+        email: editForm.email.trim(),
+        address: editForm.address.trim(),
+        website: editForm.website.trim()
+      });
+      company = updated;
+      isEditModalOpen = false;
+      toast.success('Cập nhật thông tin doanh nghiệp thành công!');
+    } catch (err: any) {
+      toast.error('Lỗi khi cập nhật thông tin: ' + (err.message || 'Lỗi kết nối'));
+    } finally {
+      isSubmitting = false;
+    }
   }
 
   async function loadData(isManual = false) {
@@ -77,6 +140,11 @@
     <Button variant="secondary" onclick={() => loadData(true)} disabled={loading}>
       {#if loading}Đang làm mới...{:else}Làm mới dữ liệu{/if}
     </Button>
+    {#if authStore.isAdmin}
+      <Button variant="primary" onclick={openEditCompanyModal}>
+        ✏️ Chỉnh sửa thông tin
+      </Button>
+    {/if}
   {/snippet}
 </PageHeader>
 
@@ -88,7 +156,14 @@
         <div class="company-code-badge">{company.code}</div>
         <h2 class="company-name">{company.name}</h2>
       </div>
-      <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
+        {#if authStore.isAdmin}
+          <Button variant="outline" size="sm" onclick={openEditCompanyModal}>
+            Chỉnh sửa
+          </Button>
+        {/if}
+      </div>
     </div>
 
     <div class="company-grid">
@@ -103,6 +178,10 @@
       <div class="info-item">
         <span class="info-label">Email chính thức</span>
         <span class="info-value">{formatField(company.email)}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Trang thông tin (Website)</span>
+        <span class="info-value font-mono">{formatField(company.website)}</span>
       </div>
       <div class="info-item full-width">
         <span class="info-label">Địa chỉ trụ sở / Nhà máy</span>
@@ -192,7 +271,158 @@
   </Card>
 </div>
 
+<!-- Edit Company Modal -->
+{#if isEditModalOpen}
+  <Modal bind:open={isEditModalOpen} title="Chỉnh Sửa Thông Tin Doanh Nghiệp" size="lg">
+    <div class="edit-company-form">
+      <div class="form-group">
+        <label for="companyName" class="form-label required">Tên Doanh Nghiệp</label>
+        <input
+          id="companyName"
+          type="text"
+          class="form-input {formErrors.name ? 'is-invalid' : ''}"
+          bind:value={editForm.name}
+          placeholder="Nhập tên chính thức của công ty"
+        />
+        {#if formErrors.name}
+          <span class="field-error-text">{formErrors.name}</span>
+        {/if}
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="companyTaxCode" class="form-label">Mã Số Thuế (MST)</label>
+          <input
+            id="companyTaxCode"
+            type="text"
+            class="form-input font-mono"
+            bind:value={editForm.taxCode}
+            placeholder="Ví dụ: 3502320150"
+          />
+        </div>
+        <div class="form-group">
+          <label for="companyPhone" class="form-label">Số Điện Thoại Hotline</label>
+          <input
+            id="companyPhone"
+            type="text"
+            class="form-input"
+            bind:value={editForm.phone}
+            placeholder="Ví dụ: 0949382374"
+          />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="companyEmail" class="form-label">Email Doanh Nghiệp</label>
+          <input
+            id="companyEmail"
+            type="email"
+            class="form-input"
+            bind:value={editForm.email}
+            placeholder="contact@premiernuts.vn"
+          />
+        </div>
+        <div class="form-group">
+          <label for="companyWebsite" class="form-label">Website Chính Thức</label>
+          <input
+            id="companyWebsite"
+            type="text"
+            class="form-input font-mono"
+            bind:value={editForm.website}
+            placeholder="https://premiernuts.vn"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="companyAddress" class="form-label">Địa Chỉ Trụ Sở & Nhà Máy</label>
+        <textarea
+          id="companyAddress"
+          class="form-textarea"
+          rows="3"
+          bind:value={editForm.address}
+          placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+        ></textarea>
+      </div>
+    </div>
+
+    {#snippet footer()}
+      <Button variant="secondary" onclick={() => (isEditModalOpen = false)} disabled={isSubmitting}>
+        Hủy bỏ
+      </Button>
+      <Button variant="primary" onclick={handleSaveCompany} disabled={isSubmitting}>
+        {#if isSubmitting}Đang lưu...{:else}Lưu thay đổi{/if}
+      </Button>
+    {/snippet}
+  </Modal>
+{/if}
+
 <style>
+  .edit-company-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 0;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pn-ink, #2B2116);
+  }
+
+  .form-label.required::after {
+    content: ' *';
+    color: #DC2626;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: 8px;
+    background: #FFF;
+    font-size: 14px;
+    color: var(--pn-ink, #2B2116);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--pn-orange, #F0821E);
+    box-shadow: 0 0 0 3px rgba(240, 130, 30, 0.15);
+  }
+
+  .form-input.is-invalid {
+    border-color: #DC2626 !important;
+    background-color: #FEF2F2 !important;
+  }
+
+  .field-error-text {
+    font-size: 12px;
+    color: #DC2626;
+    font-weight: 600;
+  }
   .company-card-header {
     display: flex;
     justify-content: space-between;

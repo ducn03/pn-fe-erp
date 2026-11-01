@@ -5,11 +5,16 @@
   import { UserStatus, type User, type UserRole } from '../identity.types';
   import { UI_CONSTANTS } from '$core/constants';
 
+  import EditUserModal from './EditUserModal.svelte';
+
   interface Props {
     users: User[];
   }
 
-  let { users }: Props = $props();
+  let { users = $bindable() }: Props = $props();
+
+  let isEditModalOpen = $state(false);
+  let selectedUserForEdit = $state<User | null>(null);
 
   function getUserStatusBadgeVariant(status: UserStatus | string): BadgeVariant {
     if (status === UserStatus.ACTIVE) {
@@ -67,7 +72,15 @@
       toast.error('Chỉ Quản trị viên (Admin) mới có quyền phân quyền hoặc chỉnh sửa tài khoản Admin!');
       return;
     }
-    toast.info(`Cấu hình quyền hạn cho: ${u.username} (${u.fullName})`);
+    selectedUserForEdit = u;
+    isEditModalOpen = true;
+  }
+
+  function handleUserSaved(updatedUser: User) {
+    const idx = users.findIndex((item) => item.id === updatedUser.id);
+    if (idx !== -1) {
+      users[idx] = updatedUser;
+    }
   }
 </script>
 
@@ -124,6 +137,18 @@
     </tbody>
   </Table>
 </div>
+
+{#if selectedUserForEdit}
+  <EditUserModal
+    open={isEditModalOpen}
+    user={selectedUserForEdit}
+    onclose={() => {
+      isEditModalOpen = false;
+      selectedUserForEdit = null;
+    }}
+    onsave={handleUserSaved}
+  />
+{/if}
 
 <style>
   .user-table-wrap {

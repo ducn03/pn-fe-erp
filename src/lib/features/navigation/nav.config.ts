@@ -17,6 +17,7 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
     heading: 'HỆ THỐNG & ĐỊNH DANH',
     items: [
       { label: 'Quản lý Người dùng (Users)', href: '/identity' },
+      { label: 'Nhật ký Truy cập (Logs)', href: '/logs' },
       { label: 'Giám sát Hệ thống (Healthcheck)', href: '/health' }
     ]
   }
