@@ -63,9 +63,19 @@
       {/if}
 
       <div class="action-row">
-        <Button variant="primary" onclick={() => goto('/')}>
-          Về Bàn Làm Việc
-        </Button>
+        {#if authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW')}
+          <Button variant="primary" onclick={() => goto('/')}>
+            Về Bàn Làm Việc
+          </Button>
+        {:else if authStore.hasPermission('INVENTORY_VIEW')}
+          <Button variant="primary" onclick={() => goto('/kho')}>
+            Đến Kho Hạt
+          </Button>
+        {:else}
+          <Button variant="primary" onclick={() => goto('/company')}>
+            Về Trang Doanh Nghiệp
+          </Button>
+        {/if}
         <Button variant="secondary" onclick={() => history.back()}>
           Quay lại Trang Trước
         </Button>

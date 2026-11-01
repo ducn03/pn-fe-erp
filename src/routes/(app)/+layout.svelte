@@ -21,6 +21,9 @@
         if (item.href === '/company') {
           return true;
         }
+        if (item.href === '/kho') {
+          return authStore.isAdmin || authStore.hasPermission('INVENTORY_VIEW');
+        }
         if (item.href === '/identity') {
           return authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
         }
@@ -46,6 +49,28 @@
     authStore.logout();
     toast.info('Đã đăng xuất khỏi hệ thống');
     goto('/login');
+  }
+  function getFriendlyRoleTitle(code?: string): string {
+    if (!code) return 'Nhân viên';
+    switch (code) {
+      case 'SUPER_ADMIN':
+      case 'ROLE_ADMIN':
+        return 'Quản Trị Viên';
+      case 'ROLE_DIRECTOR':
+        return 'Ban Giám Đốc';
+      case 'ROLE_BRANCH_MANAGER':
+        return 'Quản Lý Chi Nhánh';
+      case 'ROLE_KHO':
+        return 'Thủ Kho';
+      case 'ROLE_KE_TOAN':
+        return 'Kế Toán';
+      case 'ROLE_SAN_XUAT':
+        return 'Tổ Trưởng Sản Xuất';
+      case 'ROLE_QC':
+        return 'Kiểm Định QC';
+      default:
+        return code.replace('ROLE_', '');
+    }
   }
 </script>
 
@@ -77,7 +102,7 @@
               <span class="user-name">{user.fullName || user.username}</span>
               <span class="user-role">
                 {#if user.roles && user.roles.length > 0}
-                  {user.roles[0]}
+                  {getFriendlyRoleTitle(user.roles[0])}
                 {:else}
                   Nhân viên
                 {/if}

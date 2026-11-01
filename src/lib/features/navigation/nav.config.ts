@@ -14,6 +14,12 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
     ]
   },
   {
+    heading: 'KHO & NGUYÊN LIỆU',
+    items: [
+      { label: 'Kho hạt & Nguyên liệu', href: '/kho' }
+    ]
+  },
+  {
     heading: 'HỆ THỐNG & ĐỊNH DANH',
     items: [
       { label: 'Quản lý Người dùng', href: '/identity' },

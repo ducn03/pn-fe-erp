@@ -8,6 +8,7 @@ export interface UserPrincipalData {
   username: string;
   companyId: number;
   roles: string[];
+  permissions?: string[];
 }
 
 export interface LoginResponseData {

@@ -16,6 +16,8 @@ export async function login(input: LoginRequest): Promise<LoginResponseData> {
     let fullName = user.username;
     if (user.username === 'admin') {
       fullName = 'Quản Trị Viên Hệ Thống';
+    } else if (user.username === 'director') {
+      fullName = 'Đặng Thái Giám Đốc';
     }
 
     const sessionUser: AuthUser = {
@@ -24,6 +26,7 @@ export async function login(input: LoginRequest): Promise<LoginResponseData> {
       fullName: fullName,
       email: `${user.username}@premiernuts.vn`,
       roles: user.roles || [],
+      permissions: user.permissions || [],
       companyId: user.companyId
     };
 

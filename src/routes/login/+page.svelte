@@ -23,10 +23,23 @@
   let passwordError = $state('');
   let formError = $state('');
 
+  function getPostLoginRedirect(): string {
+    if (authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW')) {
+      return '/';
+    }
+    if (authStore.hasPermission('INVENTORY_VIEW')) {
+      return '/kho';
+    }
+    if (authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE')) {
+      return '/identity';
+    }
+    return '/company';
+  }
+
   // Tự động chuyển trang nếu đã có phiên đăng nhập
   $effect(() => {
     if (authStore.isAuthenticated) {
-      goto('/');
+      goto(getPostLoginRedirect());
     }
   });
 
@@ -80,7 +93,7 @@
       });
 
       toast.success(`Đăng nhập thành công! Xin chào ${data.user.username}`);
-      await goto('/');
+      await goto(getPostLoginRedirect());
     } catch (err: any) {
       const msg = err.message || 'Tài khoản hoặc mật khẩu không chính xác';
       formError = msg;

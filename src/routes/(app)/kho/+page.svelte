@@ -5,14 +5,18 @@
     PageHeader,
     Input,
     Select,
+    Forbidden403,
     toast
   } from '$ui';
+  import { authStore } from '$core/stores';
   import {
     InventoryTable,
     NewBatchModal,
     getInventoryBatches,
     type ProductBatch
   } from '$features/inventory';
+
+  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('INVENTORY_VIEW'));
 
   let batches = $state<ProductBatch[]>([]);
   let searchQuery = $state('');
@@ -50,6 +54,13 @@
   }
 </script>
 
+{#if !hasAccess}
+  <Forbidden403
+    title="Quyền Truy Cập Kho Bị Từ Chối"
+    description="Bạn không có quyền hạn tra cứu hoặc quản lý tồn kho nguyên liệu."
+    requiredPermission="INVENTORY_VIEW"
+  />
+{:else}
 <PageHeader
   title="Kho Hạt & Nguyên Liệu"
   subtitle="Quản lý chi tiết từng lô hạt, xuất xứ, hạn dùng và giá trị tồn kho"
@@ -119,6 +130,7 @@
   bind:open={isModalOpen}
   oncreated={handleBatchCreated}
 />
+{/if}
 
 <style>
   .warehouse-metrics {
