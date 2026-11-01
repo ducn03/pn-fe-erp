@@ -71,6 +71,28 @@
     return groups;
   });
 
+  let userInitials = $derived.by(() => {
+    const trimmed = fullName.trim();
+    if (!trimmed) {
+      return 'PN';
+    }
+    const words = trimmed.split(/\s+/).filter(Boolean);
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    const first = words[0][0];
+    const last = words[words.length - 1][0];
+    return (first + last).toUpperCase();
+  });
+
+  let selectedRole = $derived.by(() => {
+    return roles.find((r) => r.id === selectedRoleId);
+  });
+
+  let selectedDepartment = $derived.by(() => {
+    return departments.find((d) => d.id === selectedDepartmentId);
+  });
+
   async function loadInitialData() {
     loadingData = true;
     try {
@@ -225,83 +247,141 @@
 {:else}
   <div class="create-user-container">
     <div class="form-grid">
-      <!-- Cột 1: Thông tin cơ bản & Đăng nhập -->
-      <Card accent={CARD_ACCENTS.ORANGE}>
-        <div class="card-header-styled">
-          <h3 class="card-section-title">1. Thông Tin Nhân Sự & Đăng Nhập</h3>
-          <p class="card-section-desc">Họ tên, mã định danh tài khoản và thông tin phòng ban trực thuộc</p>
-        </div>
-
-        <div class="form-fields">
-          <!-- Họ và tên -->
-          <div class="form-group">
-            <label for="fullNameInput" class="form-label required">Họ và Tên Nhân Sự</label>
-            <input
-              id="fullNameInput"
-              type="text"
-              class="form-input"
-              class:is-invalid={Boolean(formErrors.fullName)}
-              value={fullName}
-              oninput={handleFullNameInput}
-              placeholder="Ví dụ: Nguyễn Đình Đức, John Smith..."
-            />
-            {#if formErrors.fullName}
-              <span class="field-error-text">{formErrors.fullName}</span>
-            {:else}
-              <span class="field-hint-text">Quy tắc: Nhập tối thiểu 2 từ (Ví dụ: Nguyễn Văn A).</span>
-            {/if}
+      <!-- Cột 1: Thông tin cơ bản & Hồ sơ tóm tắt (Stack) -->
+      <div class="left-col-stack">
+        <Card accent={CARD_ACCENTS.ORANGE}>
+          <div class="card-header-styled">
+            <h3 class="card-section-title">1. Thông Tin Nhân Sự & Đăng Nhập</h3>
+            <p class="card-section-desc">Họ tên, mã định danh tài khoản và thông tin phòng ban trực thuộc</p>
           </div>
 
-          <!-- Tên đăng nhập (Readonly Display Box - Styled identically to Create) -->
-          <div class="form-group">
-            <div class="label-with-badge">
-              <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
-              <Badge variant={BADGE_VARIANTS.PRIMARY}>Cố định</Badge>
+          <div class="form-fields">
+            <!-- Họ và tên -->
+            <div class="form-group">
+              <label for="fullNameInput" class="form-label required">Họ và Tên Nhân Sự</label>
+              <input
+                id="fullNameInput"
+                type="text"
+                class="form-input"
+                class:is-invalid={Boolean(formErrors.fullName)}
+                value={fullName}
+                oninput={handleFullNameInput}
+                placeholder="Ví dụ: Nguyễn Đình Đức, John Smith..."
+              />
+              {#if formErrors.fullName}
+                <span class="field-error-text">{formErrors.fullName}</span>
+              {:else}
+                <span class="field-hint-text">Quy tắc: Nhập tối thiểu 2 từ (Ví dụ: Nguyễn Văn A).</span>
+              {/if}
             </div>
-            <div class="auto-username-box">
-              <div class="username-display">
-                <span class="username-at">@</span>
-                <span class="username-code">{username}</span>
-                <span class="username-status">Đang hoạt động</span>
+
+            <!-- Tên đăng nhập (Readonly Display Box - Styled identically to Create) -->
+            <div class="form-group">
+              <div class="label-with-badge">
+                <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
+                <Badge variant={BADGE_VARIANTS.PRIMARY}>Cố định</Badge>
+              </div>
+              <div class="auto-username-box">
+                <div class="username-display">
+                  <span class="username-at">@</span>
+                  <span class="username-code">{username}</span>
+                  <span class="username-status">Đang hoạt động</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email & Số điện thoại -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="emailInput" class="form-label">Email Doanh Nghiệp</label>
+                <input
+                  id="emailInput"
+                  type="email"
+                  class="form-input"
+                  bind:value={email}
+                  placeholder="duc.nguyen@premiernuts.vn"
+                />
+              </div>
+              <div class="form-group">
+                <label for="phoneInput" class="form-label">Số Điện Thoại</label>
+                <input
+                  id="phoneInput"
+                  type="text"
+                  class="form-input"
+                  bind:value={phone}
+                  placeholder="Ví dụ: 0912345678"
+                />
+              </div>
+            </div>
+
+            <!-- Phòng ban -->
+            <div class="form-group">
+              <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
+              <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
+                {#each departments as dept (dept.id)}
+                  <option value={dept.id}>{dept.name}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Thẻ tóm tắt hồ sơ & Cấp bậc phân quyền -->
+        <Card accent={CARD_ACCENTS.ORANGE}>
+          <div class="card-header-styled">
+            <h3 class="card-section-title">Hồ Sơ & Trạng Thái Tài Khoản</h3>
+            <p class="card-section-desc">Tổng quan thông số định danh và mức độ phân quyền tài khoản</p>
+          </div>
+
+          <div class="account-overview-box">
+            <div class="profile-header-flex">
+              <div class="profile-avatar-circle">{userInitials}</div>
+              <div class="profile-meta-info">
+                <div class="profile-name-text">{fullName || 'Chưa cập nhật tên'}</div>
+                <div class="profile-username-sub">@{username || 'chua-co-username'}</div>
+                <div class="profile-status-pill">
+                  <span class="status-indicator-dot"></span>
+                  <span class="status-indicator-text">Tài khoản hoạt động</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overview-stats-grid">
+              <div class="stat-mini-card">
+                <span class="stat-label">Phòng Ban</span>
+                <span class="stat-value">{selectedDepartment?.name || 'Chưa phân bổ'}</span>
+              </div>
+              <div class="stat-mini-card">
+                <span class="stat-label">Chức Danh Vai Trò</span>
+                <span class="stat-value">{selectedRole?.name || 'Chưa chọn'}</span>
+              </div>
+              <div class="stat-mini-card">
+                <span class="stat-label">Quyền Hạn Kích Hoạt</span>
+                <span class="stat-value highlight-green">{selectedPermissionIds.length} quyền hạn</span>
+              </div>
+              <div class="stat-mini-card">
+                <span class="stat-label">Cấp Bậc Quản Trị</span>
+                <span class="stat-value">Cấp {selectedRole?.level || 99}</span>
               </div>
             </div>
           </div>
 
-          <!-- Email & Số điện thoại -->
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="emailInput" class="form-label">Email Doanh Nghiệp</label>
-              <input
-                id="emailInput"
-                type="email"
-                class="form-input"
-                bind:value={email}
-                placeholder="duc.nguyen@premiernuts.vn"
-              />
+          <div class="security-notes-section">
+            <div class="security-note-item">
+              <span class="note-bullet-dot"></span>
+              <span class="note-text"><strong>Nguyên tắc phân quyền:</strong> Phân bổ quyền hạn theo đúng phạm vi trách nhiệm nghiệp vụ.</span>
             </div>
-            <div class="form-group">
-              <label for="phoneInput" class="form-label">Số Điện Thoại</label>
-              <input
-                id="phoneInput"
-                type="text"
-                class="form-input"
-                bind:value={phone}
-                placeholder="Ví dụ: 0912345678"
-              />
+            <div class="security-note-item">
+              <span class="note-bullet-dot"></span>
+              <span class="note-text"><strong>Hiệu lực cập nhật:</strong> Các thay đổi về quyền hạn sẽ được đồng bộ ngay khi lưu thành công.</span>
+            </div>
+            <div class="security-note-item">
+              <span class="note-bullet-dot"></span>
+              <span class="note-text"><strong>Nhật ký bảo mật:</strong> Mọi thao tác cập nhật đều được ghi nhận vào Audit Log hệ thống.</span>
             </div>
           </div>
-
-          <!-- Phòng ban -->
-          <div class="form-group">
-            <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
-            <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
-              {#each departments as dept (dept.id)}
-                <option value={dept.id}>{dept.name}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       <!-- Cột 2: Vai trò & Phân quyền -->
       <Card accent={CARD_ACCENTS.ORANGE}>
@@ -326,7 +406,11 @@
                   <div class="role-item-header">
                     <span class="role-item-name">{r.name}</span>
                     {#if selectedRoleId === r.id}
-                      <Badge variant={BADGE_VARIANTS.PRIMARY}>Đang chọn</Badge>
+                      <span class="role-selected-check" title="Đã chọn vai trò này">
+                        <svg viewBox="0 0 20 20" fill="currentColor" class="check-icon-svg">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </span>
                     {/if}
                   </div>
                   <div class="role-item-desc">{r.description}</div>
@@ -441,7 +525,7 @@
 
   .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 420px 1fr;
     gap: 24px;
     align-items: start;
   }
@@ -450,6 +534,15 @@
     .form-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  .left-col-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: sticky;
+    top: 16px;
+    align-self: start;
   }
 
   .card-header-styled {
@@ -586,6 +679,132 @@
     font-weight: 600;
   }
 
+  /* Account Overview & Summary */
+  .account-overview-box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .profile-header-flex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--pn-line, #EEE3D3);
+  }
+
+  .profile-avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FFF4E6;
+    border: 2px solid var(--pn-orange, #F0821E);
+    color: #D97706;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .profile-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .profile-name-text {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--pn-ink, #2B2116);
+  }
+
+  .profile-username-sub {
+    font-size: 12.5px;
+    font-family: monospace;
+    font-weight: 700;
+    color: #1E3A8A;
+  }
+
+  .profile-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #059669;
+  }
+
+  .status-indicator-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
+
+  .overview-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-mini-card {
+    background: #FAF7F2;
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--pn-ink-soft, #6B5D4F);
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--pn-ink, #2B2116);
+  }
+
+  .stat-value.highlight-green {
+    color: #059669;
+  }
+
+  .security-notes-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--pn-line, #EEE3D3);
+  }
+
+  .security-note-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--pn-ink-soft, #6B5D4F);
+    line-height: 1.4;
+  }
+
+  .note-bullet-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--pn-orange, #F0821E);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
   /* Role Cards Grid */
   .role-cards-grid {
     display: grid;
@@ -628,6 +847,25 @@
     font-size: 13.5px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
+  }
+
+  .role-selected-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: #ECFDF5;
+    border: 1.5px solid #10B981;
+    border-radius: 50%;
+    color: #059669;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+  }
+
+  .check-icon-svg {
+    width: 14px;
+    height: 14px;
   }
 
   .role-item-desc {

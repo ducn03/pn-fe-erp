@@ -34,6 +34,7 @@ export interface Role {
   name: string;
   description: string;
   status: string;
+  level?: number;
   permissionIds?: number[];
   permissionCodes?: string[];
 }
