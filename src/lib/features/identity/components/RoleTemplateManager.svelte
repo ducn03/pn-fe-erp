@@ -81,7 +81,6 @@
   }
 
   function togglePermission(pId: number) {
-    if (!authStore.isAdmin) return;
     if (currentPermissionIds.includes(pId)) {
       currentPermissionIds = currentPermissionIds.filter((id) => id !== pId);
     } else {
@@ -90,7 +89,6 @@
   }
 
   function toggleAllInModule(modPerms: Permission[]) {
-    if (!authStore.isAdmin) return;
     const ids = modPerms.map((p) => p.id);
     const allChecked = ids.every((id) => currentPermissionIds.includes(id));
     if (allChecked) {
@@ -167,17 +165,13 @@
             <p class="role-detail-desc">{selectedRole.description}</p>
           </div>
 
-          {#if authStore.isAdmin}
-            <Button
-              variant="primary"
-              onclick={handleSaveRoleTemplate}
-              disabled={isSaving}
-            >
-              {#if isSaving}Đang lưu...{:else}Lưu khuôn mẫu quyền{/if}
-            </Button>
-          {:else}
-            <span class="view-only-badge">Chế độ xem khuôn mẫu</span>
-          {/if}
+          <Button
+            variant="primary"
+            onclick={handleSaveRoleTemplate}
+            disabled={isSaving}
+          >
+            {#if isSaving}Đang lưu...{:else}Lưu khuôn mẫu quyền{/if}
+          </Button>
         </div>
 
         <div class="stats-bar">
@@ -193,15 +187,13 @@
                   <span class="color-dot" style="background-color: {meta.color};"></span>
                   <span class="module-title">{meta.label}</span>
                 </div>
-                {#if authStore.isAdmin}
-                  <button
-                    type="button"
-                    class="select-all-link"
-                    onclick={() => toggleAllInModule(modPerms)}
-                  >
-                    Chọn tất cả
-                  </button>
-                {/if}
+                <button
+                  type="button"
+                  class="select-all-link"
+                  onclick={() => toggleAllInModule(modPerms)}
+                >
+                  Chọn tất cả
+                </button>
               </div>
 
               <div class="checkbox-grid">
@@ -212,17 +204,12 @@
                   <div
                     class="perm-box"
                     class:is-active={checked}
-                    onclick={() => {
-                      if (authStore.isAdmin) {
-                        togglePermission(p.id);
-                      }
-                    }}
+                    onclick={() => togglePermission(p.id)}
                   >
                     <input
                       type="checkbox"
                       class="custom-check"
                       {checked}
-                      disabled={!authStore.isAdmin}
                       tabindex="-1"
                     />
                     <div>
@@ -366,16 +353,6 @@
     margin: 4px 0 0 0;
     font-size: 13px;
     color: var(--pn-ink-soft, #6B5D4F);
-  }
-
-  .view-only-badge {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--pn-ink-soft, #6B5D4F);
-    background: #F4EBE1;
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--pn-line, #EEE3D3);
   }
 
   .stats-bar {
