@@ -27,13 +27,21 @@
     SYSTEM: { label: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
+  let availableRoles = $derived(
+    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
+  );
+
   let selectedRole = $derived.by(() => {
-    return roles.find((r) => r.id === selectedRoleId) || null;
+    return availableRoles.find((r) => r.id === selectedRoleId) || null;
   });
+
+  let availablePermissions = $derived(
+    permissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
+  );
 
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
-    for (const p of permissions) {
+    for (const p of availablePermissions) {
       const mod = p.module || 'KHAC';
       if (!groups[mod]) {
         groups[mod] = [];
@@ -52,8 +60,9 @@
       ]);
       roles = roleList;
       permissions = permList;
-      if (roles.length > 0) {
-        selectRole(roles[0]);
+      if (roleList.length > 0) {
+        const first = roleList.find((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN')) || roleList[0];
+        selectRole(first);
       }
     } catch (err: any) {
       toast.error('Lỗi khi nạp dữ liệu vai trò: ' + (err.message || 'Lỗi mạng'));
@@ -72,6 +81,7 @@
   }
 
   function togglePermission(pId: number) {
+    if (!authStore.isAdmin) return;
     if (currentPermissionIds.includes(pId)) {
       currentPermissionIds = currentPermissionIds.filter((id) => id !== pId);
     } else {
@@ -80,6 +90,7 @@
   }
 
   function toggleAllInModule(modPerms: Permission[]) {
+    if (!authStore.isAdmin) return;
     const ids = modPerms.map((p) => p.id);
     const allChecked = ids.every((id) => currentPermissionIds.includes(id));
     if (allChecked) {
@@ -128,7 +139,7 @@
       <div class="loading-box">Đang tải vai trò...</div>
     {:else}
       <div class="roles-list">
-        {#each roles as r (r.id)}
+        {#each availableRoles as r (r.id)}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <div
@@ -156,17 +167,21 @@
             <p class="role-detail-desc">{selectedRole.description}</p>
           </div>
 
-          <Button
-            variant="primary"
-            onclick={handleSaveRoleTemplate}
-            disabled={isSaving || !authStore.isAdmin}
-          >
-            {#if isSaving}Đang lưu...{:else}Lưu khuôn mẫu quyền{/if}
-          </Button>
+          {#if authStore.isAdmin}
+            <Button
+              variant="primary"
+              onclick={handleSaveRoleTemplate}
+              disabled={isSaving}
+            >
+              {#if isSaving}Đang lưu...{:else}Lưu khuôn mẫu quyền{/if}
+            </Button>
+          {:else}
+            <span class="view-only-badge">Chế độ xem khuôn mẫu</span>
+          {/if}
         </div>
 
         <div class="stats-bar">
-          <span>Khuôn mẫu đang kích hoạt: <strong>{currentPermissionIds.length}</strong> / {permissions.length} quyền hệ thống</span>
+          <span>Khuôn mẫu đang kích hoạt: <strong>{currentPermissionIds.length}</strong> / {availablePermissions.length} quyền hệ thống</span>
         </div>
 
         <div class="modules-stack">
@@ -178,13 +193,15 @@
                   <span class="color-dot" style="background-color: {meta.color};"></span>
                   <span class="module-title">{meta.label}</span>
                 </div>
-                <button
-                  type="button"
-                  class="select-all-link"
-                  onclick={() => toggleAllInModule(modPerms)}
-                >
-                  Chọn tất cả
-                </button>
+                {#if authStore.isAdmin}
+                  <button
+                    type="button"
+                    class="select-all-link"
+                    onclick={() => toggleAllInModule(modPerms)}
+                  >
+                    Chọn tất cả
+                  </button>
+                {/if}
               </div>
 
               <div class="checkbox-grid">
@@ -195,12 +212,17 @@
                   <div
                     class="perm-box"
                     class:is-active={checked}
-                    onclick={() => togglePermission(p.id)}
+                    onclick={() => {
+                      if (authStore.isAdmin) {
+                        togglePermission(p.id);
+                      }
+                    }}
                   >
                     <input
                       type="checkbox"
                       class="custom-check"
                       {checked}
+                      disabled={!authStore.isAdmin}
                       tabindex="-1"
                     />
                     <div>
@@ -344,6 +366,16 @@
     margin: 4px 0 0 0;
     font-size: 13px;
     color: var(--pn-ink-soft, #6B5D4F);
+  }
+
+  .view-only-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pn-ink-soft, #6B5D4F);
+    background: #F4EBE1;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--pn-line, #EEE3D3);
   }
 
   .stats-bar {

@@ -119,13 +119,15 @@
           <td class="text-muted font-mono">{DateHelper.formatDate(u.createdAt)}</td>
           {#if authStore.isAdmin || authStore.hasPermission('ROLE_ASSIGN')}
             <td style="text-align: right;">
-              <Button
-                size="sm"
-                variant="ghost"
-                onclick={() => handleRoleConfig(u)}
-              >
-                Phân quyền
-              </Button>
+              {#if !((u.roles?.includes('ROLE_ADMIN') || u.role === 'ROLE_ADMIN') && !authStore.isAdmin)}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onclick={() => handleRoleConfig(u)}
+                >
+                  Phân quyền
+                </Button>
+              {/if}
             </td>
           {/if}
         </tr>

@@ -57,9 +57,17 @@
     SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
+  let availableRoles = $derived(
+    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
+  );
+
+  let availablePermissions = $derived(
+    allPermissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
+  );
+
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
-    for (const p of allPermissions) {
+    for (const p of availablePermissions) {
       const mod = p.module || 'KHAC';
       if (!groups[mod]) {
         groups[mod] = [];
@@ -81,9 +89,9 @@
       roles = roleList;
       allPermissions = permList;
 
-      if (roles.length > 0) {
-        // Mặc định chọn vai trò Thủ Kho hoặc vai trò đầu tiên không phải Admin nếu người dùng không phải Super Admin
-        const defaultRole = roles.find((r) => r.code === 'ROLE_KHO') || roles[0];
+      if (roleList.length > 0) {
+        const allowed = roleList.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'));
+        const defaultRole = allowed.find((r) => r.code === 'ROLE_KHO') || allowed[0] || roleList[0];
         handleSelectRole(defaultRole.id);
       }
       if (departments.length > 0) {
@@ -349,7 +357,7 @@
           <div class="form-group">
             <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu</label>
             <div class="role-cards-grid">
-              {#each roles as r (r.id)}
+              {#each availableRoles as r (r.id)}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
@@ -380,7 +388,7 @@
             <div>
               <div class="toggle-title">Ma Trận Quyền Hạn Chi Tiết Cho Tài Khoản Này</div>
               <div class="toggle-subtitle">
-                Đang kích hoạt <strong>{selectedPermissionIds.length}</strong> / {allPermissions.length} quyền hệ thống.
+                Đang kích hoạt <strong>{selectedPermissionIds.length}</strong> / {availablePermissions.length} quyền hệ thống.
               </div>
             </div>
             <Button

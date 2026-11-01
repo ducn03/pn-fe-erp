@@ -88,16 +88,14 @@
     >
       Danh Sách Nhân Sự & Tài Khoản ({users.length})
     </button>
-    {#if authStore.isAdmin}
-      <button
-        type="button"
-        class="tab-nav-item"
-        class:active={activeTab === 'templates'}
-        onclick={() => (activeTab = 'templates')}
-      >
-        Khuôn Mẫu Phân Quyền Vai Trò
-      </button>
-    {/if}
+    <button
+      type="button"
+      class="tab-nav-item"
+      class:active={activeTab === 'templates'}
+      onclick={() => (activeTab = 'templates')}
+    >
+      Khuôn Mẫu Phân Quyền Vai Trò
+    </button>
   </div>
 
   {#if activeTab === 'users'}
@@ -116,7 +114,7 @@
 
       <UserTable bind:users />
     </Card>
-  {:else if activeTab === 'templates' && authStore.isAdmin}
+  {:else if activeTab === 'templates'}
     <RoleTemplateManager />
   {/if}
 {/if}

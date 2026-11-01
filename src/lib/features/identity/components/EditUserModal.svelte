@@ -56,9 +56,17 @@
     SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
+  let availableRoles = $derived(
+    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
+  );
+
+  let availablePermissions = $derived(
+    allPermissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
+  );
+
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
-    for (const p of allPermissions) {
+    for (const p of availablePermissions) {
       const mod = p.module || 'KHAC';
       if (!groups[mod]) {
         groups[mod] = [];
@@ -290,7 +298,7 @@
       <div class="role-section">
         <label for="edit-role-select" class="form-label required">Vai trò mẫu</label>
         <div class="role-grid">
-          {#each roles as r (r.id)}
+          {#each availableRoles as r (r.id)}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
@@ -318,7 +326,7 @@
         <div>
           <span class="perm-summary-title">Quyền hạn kích hoạt riêng cho tài khoản:</span>
           <span class="perm-summary-count">
-            <strong>{selectedPermissionIds.length}</strong> / {allPermissions.length} quyền
+            <strong>{selectedPermissionIds.length}</strong> / {availablePermissions.length} quyền
           </span>
         </div>
         <Button
