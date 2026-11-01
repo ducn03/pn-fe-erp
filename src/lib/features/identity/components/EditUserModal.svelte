@@ -52,7 +52,8 @@
     FINANCE: { title: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
     MANUFACTURING: { title: 'Xưởng Sản Xuất Chế Biến', color: '#EC4899' },
     QC: { title: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' }
+    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
+    SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
   let groupedPermissions = $derived.by(() => {
@@ -287,7 +288,7 @@
 
       <!-- Section 2: Vai trò & Phân quyền -->
       <div class="role-section">
-        <label for="edit-role-select" class="form-label required">Vai trò mẫu (Role Template)</label>
+        <label for="edit-role-select" class="form-label required">Vai trò mẫu</label>
         <div class="role-grid">
           {#each roles as r (r.id)}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -298,12 +299,11 @@
               onclick={() => handleSelectRole(r.id)}
             >
               <div class="role-card-top">
-                <span class="role-card-code">{r.code}</span>
+                <span class="role-card-name">{r.name}</span>
                 {#if selectedRoleId === r.id}
                   <span class="role-check">✓</span>
                 {/if}
               </div>
-              <div class="role-card-name">{r.name}</div>
               <div class="role-card-count">{r.permissionIds?.length || 0} quyền mặc định</div>
             </div>
           {/each}
@@ -342,7 +342,7 @@
               <div class="mod-head">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span class="mod-dot" style="background-color: {mod.color};"></span>
-                  <span class="mod-title">{mod.title} ({modKey})</span>
+                  <span class="mod-title">{mod.title}</span>
                 </div>
                 <button
                   type="button"
@@ -371,7 +371,6 @@
                     />
                     <div>
                       <div class="p-title">{p.name}</div>
-                      <div class="p-code">{p.code}</div>
                     </div>
                   </div>
                 {/each}
@@ -519,16 +518,6 @@
     margin-bottom: 4px;
   }
 
-  .role-card-code {
-    font-size: 11px;
-    font-family: monospace;
-    font-weight: 700;
-    color: var(--pn-brand, #D96B27);
-    background: rgba(217, 107, 39, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
   .role-check {
     color: var(--pn-brand, #D96B27);
     font-weight: 800;
@@ -645,12 +634,6 @@
     font-size: 12px;
     font-weight: 600;
     color: var(--pn-ink, #2B2116);
-  }
-
-  .p-code {
-    font-size: 10.5px;
-    font-family: monospace;
-    color: var(--pn-ink-soft, #6B5D4F);
   }
 
   .modal-footer-btns {

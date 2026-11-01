@@ -53,7 +53,8 @@
     FINANCE: { title: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
     MANUFACTURING: { title: 'Xưởng Sản Xuất Chế Biến', color: '#EC4899' },
     QC: { title: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' }
+    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
+    SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
   let groupedPermissions = $derived.by(() => {
@@ -329,7 +330,7 @@
             <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
             <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
               {#each departments as dept (dept.id)}
-                <option value={dept.id}>{dept.name} ({dept.code})</option>
+                <option value={dept.id}>{dept.name}</option>
               {/each}
             </select>
           </div>
@@ -346,7 +347,7 @@
         <div class="form-fields">
           <!-- Chọn Vai Trò Mẫu -->
           <div class="form-group">
-            <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu (Role Template)</label>
+            <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu</label>
             <div class="role-cards-grid">
               {#each roles as r (r.id)}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -357,12 +358,11 @@
                   onclick={() => handleSelectRole(r.id)}
                 >
                   <div class="role-item-header">
-                    <span class="role-item-code">{r.code}</span>
+                    <span class="role-item-name">{r.name}</span>
                     {#if selectedRoleId === r.id}
                       <span class="check-icon">✓</span>
                     {/if}
                   </div>
-                  <div class="role-item-name">{r.name}</div>
                   <div class="role-item-desc">{r.description}</div>
                   <div class="role-item-perm-count">
                     {r.permissionIds?.length || 0} quyền hạn mặc định
@@ -405,7 +405,7 @@
                   <div class="module-header">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span class="module-dot" style="background-color: {modInfo.color};"></span>
-                      <span class="module-name">{modInfo.title} ({moduleKey})</span>
+                      <span class="module-name">{modInfo.title}</span>
                     </div>
                     <button
                       type="button"
@@ -434,7 +434,6 @@
                         />
                         <div class="perm-info">
                           <div class="perm-title">{p.name}</div>
-                          <div class="perm-code">{p.code}</div>
                           {#if p.description}
                             <div class="perm-desc">{p.description}</div>
                           {/if}
@@ -671,13 +670,6 @@
     align-items: center;
   }
 
-  .role-item-code {
-    font-size: 11px;
-    font-weight: 800;
-    font-family: monospace;
-    color: var(--pn-orange, #F0821E);
-  }
-
   .check-icon {
     font-size: 12px;
     font-weight: 800;
@@ -820,12 +812,6 @@
     font-size: 12.5px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
-  }
-
-  .perm-code {
-    font-size: 10.5px;
-    font-family: monospace;
-    color: var(--pn-ink-soft, #8C7D6F);
   }
 
   .perm-desc {

@@ -15,8 +15,17 @@
     return ERP_NAV_SECTIONS.map((sec) => ({
       heading: sec.heading,
       items: sec.items.filter((item) => {
+        if (item.href === '/') {
+          return authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW');
+        }
+        if (item.href === '/company') {
+          return true;
+        }
         if (item.href === '/identity') {
           return authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
+        }
+        if (item.href === '/logs') {
+          return authStore.isAdmin || authStore.hasPermission('LOG_VIEW');
         }
         if (item.href === '/health') {
           return authStore.isAdmin || authStore.hasPermission('HEALTH_VIEW');

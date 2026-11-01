@@ -4,7 +4,7 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
   {
     heading: 'TỔNG QUAN',
     items: [
-      { label: 'Bàn làm việc (Dashboard)', href: '/' }
+      { label: 'Bàn làm việc', href: '/' }
     ]
   },
   {
@@ -16,9 +16,9 @@ export const ERP_NAV_SECTIONS: NavSection[] = [
   {
     heading: 'HỆ THỐNG & ĐỊNH DANH',
     items: [
-      { label: 'Quản lý Người dùng (Users)', href: '/identity' },
-      { label: 'Nhật ký Truy cập (Logs)', href: '/logs' },
-      { label: 'Giám sát Hệ thống (Healthcheck)', href: '/health' }
+      { label: 'Quản lý Người dùng', href: '/identity' },
+      { label: 'Nhật ký Truy cập', href: '/logs' },
+      { label: 'Giám sát Hệ thống', href: '/health' }
     ]
   }
 ];

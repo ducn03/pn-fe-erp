@@ -6,6 +6,7 @@
     PageHeader,
     Callout,
     StatCard,
+    Forbidden403,
     toast
   } from '$ui';
   import { goto } from '$app/navigation';
@@ -22,6 +23,7 @@
 
   type StatusFilterType = (typeof STATUS_FILTER)[keyof typeof STATUS_FILTER];
 
+  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('LOG_VIEW'));
   let logs = $state<LoginLogItem[]>([]);
   let totalElements = $state(0);
   let loading = $state(true);
@@ -143,7 +145,7 @@
   }
 
   $effect(() => {
-    if (authStore.isAdmin) {
+    if (hasAccess) {
       loadLogs(false);
     }
   });
@@ -175,23 +177,12 @@
   {/snippet}
 </PageHeader>
 
-{#if !authStore.isAdmin}
-  <!-- Access Denied for Non-Admin -->
-  <Card accent="orange">
-    <div class="access-denied-wrap">
-      <h2 class="access-title">Khu vực Giới hạn Quyền Quản trị</h2>
-      <p class="access-desc">
-        Màn hình theo dõi nhật ký truy cập và kiểm toán an toàn thông tin chỉ dành riêng cho tài khoản
-        có vai trò <strong>Quản trị viên Hệ thống (ADMIN)</strong>.
-      </p>
-      <p class="access-desc">
-        Vui lòng liên hệ Trưởng bộ phận CNTT nếu bạn cần cấp quyền điều tra sự cố nghiệp vụ.
-      </p>
-      <div class="access-actions">
-        <Button variant="primary" onclick={() => goto('/')}>Về Trang Chủ ERP</Button>
-      </div>
-    </div>
-  </Card>
+{#if !hasAccess}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Màn hình theo dõi nhật ký truy cập và kiểm toán an toàn thông tin chỉ dành riêng cho tài khoản được cấp quyền xem nhật ký."
+    requiredPermission="LOG_VIEW"
+  />
 {:else}
   <!-- Stat Metrics -->
   <div class="stat-grid">
@@ -380,30 +371,6 @@
 {/if}
 
 <style>
-  .access-denied-wrap {
-    padding: 48px 24px;
-    text-align: center;
-    max-width: 620px;
-    margin: 0 auto;
-  }
-
-  .access-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--pn-ink, #2B2116);
-    margin: 0 0 12px;
-  }
-
-  .access-desc {
-    font-size: 14.5px;
-    color: var(--pn-ink-soft, #6B5D4F);
-    line-height: 1.6;
-    margin: 0 0 12px;
-  }
-
-  .access-actions {
-    margin-top: 24px;
-  }
 
   .stat-grid {
     display: grid;

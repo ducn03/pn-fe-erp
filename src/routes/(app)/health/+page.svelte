@@ -4,18 +4,21 @@
     Card,
     Badge,
     Button,
+    Forbidden403,
     toast,
     CARD_ACCENTS,
     BADGE_VARIANTS,
     type CardAccent,
     type BadgeVariant
   } from '$ui';
+  import { authStore } from '$core/stores';
   import {
     getAllServicesHealth,
     HealthStatus,
     type ServiceHealthData
   } from '$features/health';
 
+  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('HEALTH_VIEW'));
   let services = $state<ServiceHealthData[]>([]);
   let loading = $state(true);
   let lastChecked = $state('');
@@ -56,6 +59,7 @@
   }
 
   async function checkHealth() {
+    if (!hasAccess) return;
     loading = true;
     try {
       services = await getAllServicesHealth();
@@ -73,32 +77,41 @@
   }
 
   $effect(() => {
-    checkHealth();
+    if (hasAccess) {
+      checkHealth();
+    }
   });
 </script>
 
 <svelte:head>
-  <title>Giám Sát Hệ Thống (Healthcheck) | Premier Nuts ERP</title>
+  <title>Giám Sát Hệ Thống | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Giám Sát Hệ Thống (System Healthcheck)"
-  subtitle="Kiểm tra trạng thái hoạt động thực tế của API Gateway, Identity Service và Cơ sở dữ liệu PostgreSQL"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Hệ thống' },
-    { label: 'Healthcheck' }
-  ]}
->
-  {#snippet actions()}
-    {#if lastChecked}
-      <span class="last-checked">Cập nhật lúc: {lastChecked}</span>
-    {/if}
-    <Button variant="secondary" onclick={checkHealth} disabled={loading}>
-      {#if loading}Đang kiểm tra...{:else}Kiểm tra lại{/if}
-    </Button>
-  {/snippet}
-</PageHeader>
+{#if !hasAccess}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Bạn không có quyền hạn giám sát tình trạng hệ thống máy chủ và cơ sở dữ liệu."
+    requiredPermission="HEALTH_VIEW"
+  />
+{:else}
+  <PageHeader
+    title="Giám Sát Hệ Thống"
+    subtitle="Kiểm tra trạng thái hoạt động thực tế của API Gateway, Identity Service và Cơ sở dữ liệu PostgreSQL"
+    breadcrumbs={[
+      { label: 'Premier Nuts', href: '/' },
+      { label: 'Hệ thống' },
+      { label: 'Giám sát hệ thống' }
+    ]}
+  >
+    {#snippet actions()}
+      {#if lastChecked}
+        <span class="last-checked">Cập nhật lúc: {lastChecked}</span>
+      {/if}
+      <Button variant="secondary" onclick={checkHealth} disabled={loading}>
+        {#if loading}Đang kiểm tra...{:else}Kiểm tra lại{/if}
+      </Button>
+    {/snippet}
+  </PageHeader>
 
 <div class="health-grid">
   {#each services as s (s.serviceId)}
@@ -152,6 +165,7 @@
     </Card>
   {/each}
 </div>
+{/if}
 
 <style>
   .last-checked {

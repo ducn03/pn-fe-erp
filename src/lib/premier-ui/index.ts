@@ -20,6 +20,7 @@ export { default as Tabs } from './components/Tabs.svelte';
 export { default as Sidebar } from './components/Sidebar.svelte';
 export { default as PageHeader } from './components/PageHeader.svelte';
 export { default as StatCard } from './components/StatCard.svelte';
+export { default as Forbidden403 } from './components/Forbidden403.svelte';
 
 // Stores & Utilities
 export { toast } from './toast.svelte';

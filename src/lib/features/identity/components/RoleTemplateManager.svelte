@@ -23,7 +23,8 @@
     FINANCE: { label: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
     MANUFACTURING: { label: 'Xưởng Sản Xuất', color: '#EC4899' },
     QC: { label: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { label: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' }
+    MANAGEMENT: { label: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
+    SYSTEM: { label: 'Quản Trị Hệ Thống', color: '#6366F1' }
   };
 
   let selectedRole = $derived.by(() => {
@@ -136,10 +137,9 @@
             onclick={() => selectRole(r)}
           >
             <div class="role-btn-top">
-              <span class="role-btn-code">{r.code}</span>
-              <span class="role-btn-count">{r.permissionIds?.length || 0} quyền</span>
+              <span class="role-btn-name">{r.name}</span>
             </div>
-            <div class="role-btn-name">{r.name}</div>
+            <div class="role-btn-count">{r.permissionIds?.length || 0} quyền hạn mặc định</div>
           </div>
         {/each}
       </div>
@@ -152,10 +152,7 @@
       <Card accent={CARD_ACCENTS.ORANGE}>
         <div class="role-detail-header">
           <div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
-              <span class="role-badge-code">{selectedRole.code}</span>
-              <h3 class="role-detail-name">{selectedRole.name}</h3>
-            </div>
+            <h3 class="role-detail-name">{selectedRole.name}</h3>
             <p class="role-detail-desc">{selectedRole.description}</p>
           </div>
 
@@ -179,7 +176,7 @@
               <div class="module-card-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span class="color-dot" style="background-color: {meta.color};"></span>
-                  <span class="module-title">{meta.label} ({modKey})</span>
+                  <span class="module-title">{meta.label}</span>
                 </div>
                 <button
                   type="button"
@@ -208,7 +205,6 @@
                     />
                     <div>
                       <div class="p-name">{p.name}</div>
-                      <div class="p-code">{p.code}</div>
                       {#if p.description}
                         <div class="p-desc">{p.description}</div>
                       {/if}
@@ -314,13 +310,6 @@
     align-items: center;
   }
 
-  .role-btn-code {
-    font-size: 11px;
-    font-weight: 800;
-    font-family: monospace;
-    color: var(--pn-orange, #F0821E);
-  }
-
   .role-btn-count {
     font-size: 11px;
     font-weight: 700;
@@ -342,17 +331,6 @@
     margin-bottom: 16px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--pn-line, #EEE3D3);
-  }
-
-  .role-badge-code {
-    font-size: 11px;
-    font-weight: 800;
-    font-family: monospace;
-    color: var(--pn-orange, #F0821E);
-    background: #FFF5EA;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid #FDEBD3;
   }
 
   .role-detail-name {
@@ -460,12 +438,6 @@
     font-size: 12px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
-  }
-
-  .p-code {
-    font-size: 10px;
-    font-family: monospace;
-    color: var(--pn-ink-soft, #8C7D6F);
   }
 
   .p-desc {

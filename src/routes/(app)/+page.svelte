@@ -4,6 +4,7 @@
     Card,
     PageHeader,
     Badge,
+    Forbidden403,
     toast,
     CARD_ACCENTS,
     BADGE_VARIANTS
@@ -12,11 +13,13 @@
   import { getUsers, UserTable, type User } from '$features/identity';
   import { authStore } from '$core/stores';
 
+  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW'));
   let metrics = $state<any[]>([]);
   let recentUsers = $state<User[]>([]);
   let refreshing = $state(false);
 
   async function loadDashboardData(isManual = false) {
+    if (!hasAccess) return;
     if (isManual) {
       refreshing = true;
     }
@@ -47,92 +50,97 @@
 
   // Load initial data
   $effect(() => {
-    loadDashboardData(false);
+    if (hasAccess) {
+      loadDashboardData(false);
+    }
   });
 </script>
 
 <svelte:head>
-  <title>Bàn Làm Việc Quản Trị | Premier Nuts ERP</title>
+  <title>Bàn Làm Việc | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Bàn Làm Việc Quản Trị"
-  subtitle="Tổng quan hệ thống điều hành nguồn lực Premier Nuts ERP"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Quản trị' },
-    { label: 'Dashboard' }
-  ]}
->
-  {#snippet actions()}
-    <Button
-      variant="secondary"
-      onclick={() => loadDashboardData(true)}
-      disabled={refreshing}
-    >
-      {#if refreshing}
-        Đang làm mới...
-      {:else}
-        Làm mới dữ liệu
-      {/if}
-    </Button>
-  {/snippet}
-</PageHeader>
+{#if !hasAccess}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Bạn không có quyền hạn truy cập Bàn làm việc tổng quan của hệ thống."
+    requiredPermission="DASHBOARD_VIEW"
+  />
+{:else}
+  <PageHeader
+    title="Bàn Làm Việc"
+    subtitle="Tổng quan hệ thống điều hành nguồn lực Premier Nuts ERP"
+    breadcrumbs={[
+      { label: 'Premier Nuts', href: '/' },
+      { label: 'Bàn làm việc' }
+    ]}
+  >
+    {#snippet actions()}
+      <Button
+        variant="secondary"
+        onclick={() => loadDashboardData(true)}
+        disabled={refreshing}
+      >
+        {#if refreshing}
+          Đang làm mới...
+        {:else}
+          Làm mới dữ liệu
+        {/if}
+      </Button>
+    {/snippet}
+  </PageHeader>
 
-<!-- 4 Real Metric Stat Cards -->
-<StatCardsGrid {metrics} />
+  <!-- 4 Real Metric Stat Cards -->
+  <StatCardsGrid {metrics} />
 
-<!-- Quick Modules Overview Grid -->
-<div class="modules-grid">
-  <!-- Module 1: Company -->
-  <Card accent={CARD_ACCENTS.ORANGE}>
-    <div class="module-card-body">
-      <div class="module-badge-row">
-        <span class="module-code">PREMIER_NUTS</span>
-        <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
+  <!-- Quick Modules Overview Grid -->
+  <div class="modules-grid">
+    <!-- Module 1: Company -->
+    <Card accent={CARD_ACCENTS.ORANGE}>
+      <div class="module-card-body">
+        <div class="module-badge-row">
+          <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
+        </div>
+        <h3 class="module-title">Thông Tin Doanh Nghiệp</h3>
+        <p class="module-desc">
+          Quản lý pháp nhân công ty, mã số thuế, cơ cấu 5 phòng ban và bảng phân định vai trò trách nhiệm.
+        </p>
+        <div class="module-footer">
+          <a href="/company" class="module-action-link">
+            Vào phân hệ Doanh nghiệp &rarr;
+          </a>
+        </div>
       </div>
-      <h3 class="module-title">Thông Tin Doanh Nghiệp</h3>
-      <p class="module-desc">
-        Quản lý pháp nhân công ty, mã số thuế, cơ cấu 5 phòng ban và bảng phân định vai trò trách nhiệm.
-      </p>
-      <div class="module-footer">
-        <a href="/company" class="module-action-link">
-          Vào phân hệ Doanh nghiệp &rarr;
-        </a>
-      </div>
-    </div>
-  </Card>
+    </Card>
 
-  <!-- Module 2: Identity & Users -->
-  <Card accent={CARD_ACCENTS.ORANGE}>
-    <div class="module-card-body">
-      <div class="module-badge-row">
-        <span class="module-code">IDENTITY_SERVICE</span>
-        <Badge variant={BADGE_VARIANTS.SUCCESS}>Đã Sẵn Sàng</Badge>
+    <!-- Module 2: Identity & Users -->
+    <Card accent={CARD_ACCENTS.ORANGE}>
+      <div class="module-card-body">
+        <div class="module-badge-row">
+          <Badge variant={BADGE_VARIANTS.SUCCESS}>Đã Sẵn Sàng</Badge>
+        </div>
+        <h3 class="module-title">Quản Trị Người Dùng & Phân Quyền</h3>
+        <p class="module-desc">
+          Quản lý nhân sự, cấp phát tài khoản nghiệp vụ và kiểm soát phân quyền bảo vệ quyền Admin.
+        </p>
+        <div class="module-footer">
+          <a href="/identity" class="module-action-link">
+            Quản lý tài khoản &rarr;
+          </a>
+        </div>
       </div>
-      <h3 class="module-title">Quản Trị Người Dùng & Phân Quyền</h3>
-      <p class="module-desc">
-        Quản lý nhân sự, cấp phát tài khoản nghiệp vụ và kiểm soát phân quyền RBAC bảo vệ quyền Admin.
-      </p>
-      <div class="module-footer">
-        <a href="/identity" class="module-action-link">
-          Quản lý tài khoản &rarr;
-        </a>
-      </div>
-    </div>
-  </Card>
+    </Card>
 
-  <!-- Module 3: Healthcheck -->
-  <Card accent={CARD_ACCENTS.GREEN}>
-    <div class="module-card-body">
-      <div class="module-badge-row">
-        <span class="module-code">SYSTEM_HEALTH</span>
-        <Badge variant={BADGE_VARIANTS.SUCCESS}>Trực Tuyến</Badge>
-      </div>
-      <h3 class="module-title">Giám Sát Hệ Thống</h3>
-      <p class="module-desc">
-        Kiểm tra trạng thái thời gian thực của API Gateway (:9000), Identity (:9001) và PostgreSQL Database.
-      </p>
+    <!-- Module 3: Healthcheck -->
+    <Card accent={CARD_ACCENTS.GREEN}>
+      <div class="module-card-body">
+        <div class="module-badge-row">
+          <Badge variant={BADGE_VARIANTS.SUCCESS}>Trực Tuyến</Badge>
+        </div>
+        <h3 class="module-title">Giám Sát Hệ Thống</h3>
+        <p class="module-desc">
+          Kiểm tra trạng thái thời gian thực của API Gateway, Identity và cơ sở dữ liệu PostgreSQL.
+        </p>
       <div class="module-footer">
         <a href="/health" class="module-action-link">
           Kiểm tra kết nối &rarr;
@@ -158,6 +166,7 @@
     <UserTable users={recentUsers} />
   </div>
 </Card>
+{/if}
 
 <style>
   .modules-grid {
@@ -178,17 +187,6 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-  }
-
-  .module-code {
-    font-family: monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--pn-ink-soft);
-    background: var(--pn-sidebar-bg);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid var(--pn-line);
   }
 
   .module-title {

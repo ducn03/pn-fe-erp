@@ -3,6 +3,7 @@
     Button,
     Card,
     PageHeader,
+    Forbidden403,
     toast
   } from '$ui';
   import { goto } from '$app/navigation';
@@ -14,11 +15,15 @@
     type User
   } from '$features/identity';
 
+  let hasAccess = $derived(
+    authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE')
+  );
   let activeTab = $state<'users' | 'templates'>('users');
   let users = $state<User[]>([]);
   let loading = $state(true);
 
   async function loadUsers(isManual = false) {
+    if (!hasAccess) return;
     loading = true;
     try {
       users = await getUsers();
@@ -33,7 +38,9 @@
   }
 
   $effect(() => {
-    loadUsers(false);
+    if (hasAccess) {
+      loadUsers(false);
+    }
   });
 </script>
 
@@ -41,67 +48,77 @@
   <title>Quản Lý Người Dùng & Phân Quyền | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Quản Lý Tài Khoản & Phân Quyền"
-  subtitle="Quản trị nhân sự, vai trò nghiệp vụ và phân quyền truy cập hệ thống Premier Nuts"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Hệ thống' },
-    { label: 'Identity' }
-  ]}
->
-  {#snippet actions()}
-    {#if activeTab === 'users'}
-      <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
-        {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
-      </Button>
-      {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
-        <Button variant="primary" onclick={() => goto('/identity/create')}>
-          + Cấp tài khoản mới
+{#if !hasAccess}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Bạn không có quyền hạn tra cứu hoặc quản lý tài khoản người dùng."
+    requiredPermission="USER_VIEW"
+  />
+{:else}
+  <PageHeader
+    title="Quản Lý Tài Khoản & Phân Quyền"
+    subtitle="Quản trị nhân sự, vai trò nghiệp vụ và phân quyền truy cập hệ thống Premier Nuts"
+    breadcrumbs={[
+      { label: 'Premier Nuts', href: '/' },
+      { label: 'Hệ thống' },
+      { label: 'Quản lý người dùng' }
+    ]}
+  >
+    {#snippet actions()}
+      {#if activeTab === 'users'}
+        <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
+          {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
         </Button>
+        {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+          <Button variant="primary" onclick={() => goto('/identity/create')}>
+            + Cấp tài khoản mới
+          </Button>
+        {/if}
       {/if}
+    {/snippet}
+  </PageHeader>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav-bar">
+    <button
+      type="button"
+      class="tab-nav-item"
+      class:active={activeTab === 'users'}
+      onclick={() => (activeTab = 'users')}
+    >
+      Danh Sách Nhân Sự & Tài Khoản ({users.length})
+    </button>
+    {#if authStore.isAdmin}
+      <button
+        type="button"
+        class="tab-nav-item"
+        class:active={activeTab === 'templates'}
+        onclick={() => (activeTab = 'templates')}
+      >
+        Khuôn Mẫu Phân Quyền Vai Trò
+      </button>
     {/if}
-  {/snippet}
-</PageHeader>
+  </div>
 
-<!-- Navigation Tabs -->
-<div class="tabs-nav-bar">
-  <button
-    type="button"
-    class="tab-nav-item"
-    class:active={activeTab === 'users'}
-    onclick={() => (activeTab = 'users')}
-  >
-    Danh Sách Nhân Sự & Tài Khoản ({users.length})
-  </button>
-  <button
-    type="button"
-    class="tab-nav-item"
-    class:active={activeTab === 'templates'}
-    onclick={() => (activeTab = 'templates')}
-  >
-    Khuôn Mẫu Phân Quyền Vai Trò (Role Templates)
-  </button>
-</div>
-
-{#if activeTab === 'users'}
-  <Card accent="orange">
-    <div class="table-header">
-      <div>
-        <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
-        <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
+  {#if activeTab === 'users'}
+    <Card accent="orange">
+      <div class="table-header">
+        <div>
+          <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
+          <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
+        </div>
+        {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+          <Button variant="primary" size="sm" onclick={() => goto('/identity/create')}>
+            + Thêm nhân sự mới
+          </Button>
+        {/if}
       </div>
-      {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
-        <Button variant="primary" size="sm" onclick={() => goto('/identity/create')}>
-          + Thêm nhân sự mới
-        </Button>
-      {/if}
-    </div>
 
-    <UserTable bind:users />
-  </Card>
-{:else if activeTab === 'templates'}
-  <RoleTemplateManager />
+      <UserTable bind:users />
+    </Card>
+  {:else if activeTab === 'templates' && authStore.isAdmin}
+    <RoleTemplateManager />
+  {/if}
 {/if}
 
 <style>

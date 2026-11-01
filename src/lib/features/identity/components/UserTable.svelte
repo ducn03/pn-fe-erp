@@ -44,7 +44,7 @@
     switch (role) {
       case 'SUPER_ADMIN':
       case 'ROLE_ADMIN':
-        return { label: 'Quản Trị Viên (Admin)', variant: 'primary' as const };
+        return { label: 'Quản Trị Viên', variant: 'primary' as const };
       case 'ROLE_DIRECTOR':
         return { label: 'Ban Giám Đốc', variant: 'primary' as const };
       case 'ROLE_BRANCH_MANAGER':
