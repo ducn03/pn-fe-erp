@@ -24,4 +24,15 @@ export interface Role {
   name: string;
   description: string;
   status: string;
+  permissionIds?: number[];
+  permissionCodes?: string[];
+}
+
+export interface Permission {
+  id: number;
+  code: string;
+  name: string;
+  module: string;
+  description?: string;
+  status: string;
 }

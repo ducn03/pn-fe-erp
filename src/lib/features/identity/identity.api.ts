@@ -34,7 +34,11 @@ export async function getUsers(params?: UserListParams): Promise<User[]> {
 
   return rawList.map((u: any): User => {
     let primaryRole = 'Nhân Viên';
-    if (u.roles && Array.isArray(u.roles) && u.roles.length > 0) {
+    if (u.roleName) {
+      primaryRole = u.roleName;
+    } else if (u.roleCode) {
+      primaryRole = u.roleCode;
+    } else if (u.roles && Array.isArray(u.roles) && u.roles.length > 0) {
       primaryRole = u.roles[0];
     } else if (u.role) {
       primaryRole = u.role;
@@ -59,9 +63,14 @@ export async function getUsers(params?: UserListParams): Promise<User[]> {
       department: deptName,
       companyId: u.companyId,
       status: u.status,
+      roleId: u.roleId,
+      roleCode: u.roleCode,
+      roleName: u.roleName,
       roles: u.roles || [],
       role: primaryRole,
       roleIds: u.roleIds || [],
+      permissionIds: u.permissionIds || [],
+      permissions: u.permissions || [],
       lastLoginAt: u.lastLoginAt,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt
@@ -85,8 +94,14 @@ export async function createUser(input: CreateUserInput): Promise<User> {
   if (input.departmentId) {
     payload.departmentId = input.departmentId;
   }
+  if (input.roleId) {
+    payload.roleId = input.roleId;
+  }
   if (input.roleIds && input.roleIds.length > 0) {
     payload.roleIds = input.roleIds;
+  }
+  if (input.permissionIds && input.permissionIds.length > 0) {
+    payload.permissionIds = input.permissionIds;
   }
   if (input.companyId) {
     payload.companyId = input.companyId;
@@ -99,7 +114,11 @@ export async function createUser(input: CreateUserInput): Promise<User> {
   }
 
   let primaryRole = 'Nhân Viên';
-  if (created.roles && Array.isArray(created.roles) && created.roles.length > 0) {
+  if (created.roleName) {
+    primaryRole = created.roleName;
+  } else if (created.roleCode) {
+    primaryRole = created.roleCode;
+  } else if (created.roles && Array.isArray(created.roles) && created.roles.length > 0) {
     primaryRole = created.roles[0];
   } else if (input.role) {
     primaryRole = input.role;
@@ -124,9 +143,14 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     department: deptName,
     companyId: created.companyId,
     status: created.status,
+    roleId: created.roleId,
+    roleCode: created.roleCode,
+    roleName: created.roleName,
     roles: created.roles || [],
     role: primaryRole,
     roleIds: created.roleIds || [],
+    permissionIds: created.permissionIds || [],
+    permissions: created.permissions || [],
     createdAt: created.createdAt,
     updatedAt: created.updatedAt
   };

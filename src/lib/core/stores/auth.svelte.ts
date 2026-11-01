@@ -9,6 +9,7 @@ export interface AuthUser {
   fullName: string;
   email: string;
   roles: string[];
+  permissions?: string[];
   companyId?: number;
 }
 
@@ -89,13 +90,23 @@ class AuthStore {
    * Kiểm tra quyền hạn chi tiết (Permission)
    */
   hasPermission(permission: string): boolean {
-    if (!this.user || !this.user.roles) return false;
+    if (!this.user) return false;
     if (this.isAdmin) return true;
 
-    for (const r of this.user.roles) {
-      const perms = ROLE_PERMISSIONS[r] || [];
-      if (perms.includes('*') || perms.includes(permission)) {
+    // 1. Kiểm tra trực tiếp từ danh sách permissions của User
+    if (this.user.permissions && this.user.permissions.length > 0) {
+      if (this.user.permissions.includes('*') || this.user.permissions.includes(permission)) {
         return true;
+      }
+    }
+
+    // 2. Tương thích ngược: kiểm tra từ template role
+    if (this.user.roles && this.user.roles.length > 0) {
+      for (const r of this.user.roles) {
+        const perms = ROLE_PERMISSIONS[r] || [];
+        if (perms.includes('*') || perms.includes(permission)) {
+          return true;
+        }
       }
     }
     return false;

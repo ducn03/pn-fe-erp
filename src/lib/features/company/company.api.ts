@@ -1,5 +1,5 @@
 import { apiClient, type ApiEnvelope } from '$core/api';
-import type { Company, Department, Role } from './company.types';
+import type { Company, Department, Role, Permission } from './company.types';
 
 export async function getCompany(): Promise<Company> {
   const res = await apiClient.get<ApiEnvelope<Company> | Company>('/api/v1/company');
@@ -13,5 +13,10 @@ export async function getDepartments(): Promise<Department[]> {
 
 export async function getRoles(): Promise<Role[]> {
   const res = await apiClient.get<ApiEnvelope<Role[]> | Role[]>('/api/v1/roles');
+  return (res as any)?.data || res || [];
+}
+
+export async function getPermissions(): Promise<Permission[]> {
+  const res = await apiClient.get<ApiEnvelope<Permission[]> | Permission[]>('/api/v1/permissions');
   return (res as any)?.data || res || [];
 }

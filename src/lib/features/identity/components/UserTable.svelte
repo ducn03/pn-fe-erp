@@ -40,6 +40,10 @@
       case 'SUPER_ADMIN':
       case 'ROLE_ADMIN':
         return { label: 'Quản Trị Viên (Admin)', variant: 'primary' as const };
+      case 'ROLE_DIRECTOR':
+        return { label: 'Ban Giám Đốc', variant: 'primary' as const };
+      case 'ROLE_BRANCH_MANAGER':
+        return { label: 'Quản Lý Chi Nhánh', variant: 'warning' as const };
       case 'ROLE_KHO':
         return { label: 'Thủ Kho', variant: 'warning' as const };
       case 'ROLE_KE_TOAN':
