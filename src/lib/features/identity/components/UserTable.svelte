@@ -65,9 +65,8 @@
   }
 
   function handleRoleConfig(u: User) {
-    const isTargetAdmin = u.roles?.includes('ROLE_ADMIN') || u.role === 'ROLE_ADMIN';
-    if (isTargetAdmin && !authStore.isAdmin) {
-      toast.error('Chỉ Quản trị viên (Admin) mới có quyền phân quyền hoặc chỉnh sửa tài khoản Admin!');
+    if (u.canManage === false) {
+      toast.error('Bạn không có thẩm quyền quản trị cấp bậc của tài khoản này!');
       return;
     }
     goto(`/identity/${u.id}/edit`);
@@ -85,7 +84,7 @@
         <th style="min-width: 170px;">Vai trò</th>
         <th style="min-width: 110px;">Trạng thái</th>
         <th style="min-width: 120px;">Ngày tạo</th>
-        {#if authStore.isAdmin || authStore.hasPermission('ROLE_ASSIGN')}
+        {#if authStore.hasPermission('ROLE_ASSIGN') || authStore.hasPermission('USER_MANAGE')}
           <th style="min-width: 110px; text-align: right;">Thao tác</th>
         {/if}
       </tr>
@@ -107,9 +106,9 @@
             </Badge>
           </td>
           <td class="text-muted font-mono">{DateHelper.formatDate(u.createdAt)}</td>
-          {#if authStore.isAdmin || authStore.hasPermission('ROLE_ASSIGN')}
+          {#if authStore.hasPermission('ROLE_ASSIGN') || authStore.hasPermission('USER_MANAGE')}
             <td style="text-align: right;">
-              {#if !((u.roles?.includes('ROLE_ADMIN') || u.role === 'ROLE_ADMIN') && !authStore.isAdmin)}
+              {#if u.canManage !== false}
                 <Button
                   size="sm"
                   variant="ghost"

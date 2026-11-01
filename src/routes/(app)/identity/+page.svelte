@@ -16,7 +16,7 @@
   } from '$features/identity';
 
   let hasAccess = $derived(
-    authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE')
+    authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE')
   );
   let activeTab = $state<'users' | 'templates'>('users');
   let users = $state<User[]>([]);
@@ -69,7 +69,7 @@
         <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
           {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
         </Button>
-        {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+        {#if authStore.hasPermission('USER_MANAGE')}
           <Button variant="primary" onclick={() => goto('/identity/create')}>
             + Cấp tài khoản mới
           </Button>
@@ -105,7 +105,7 @@
           <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
           <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
         </div>
-        {#if authStore.isAdmin || authStore.hasPermission('USER_MANAGE')}
+        {#if authStore.hasPermission('USER_MANAGE')}
           <Button variant="primary" size="sm" onclick={() => goto('/identity/create')}>
             + Thêm nhân sự mới
           </Button>

@@ -16,7 +16,7 @@
     type ProductBatch
   } from '$features/inventory';
 
-  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('INVENTORY_VIEW'));
+  let hasAccess = $derived(authStore.hasPermission('INVENTORY_VIEW'));
 
   let batches = $state<ProductBatch[]>([]);
   let searchQuery = $state('');

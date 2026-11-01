@@ -51,13 +51,9 @@
   let formErrors = $state<Record<string, string>>({});
   let isSubmitting = $state(false);
 
-  let availableRoles = $derived(
-    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
-  );
+  let availableRoles = $derived(roles);
 
-  let availablePermissions = $derived(
-    allPermissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
-  );
+  let availablePermissions = $derived(allPermissions);
 
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};

@@ -46,13 +46,9 @@
   let isGeneratingUsername = $state(false);
   let usernameDebounceTimer: any = null;
 
-  let availableRoles = $derived(
-    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
-  );
+  let availableRoles = $derived(roles);
 
-  let availablePermissions = $derived(
-    allPermissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
-  );
+  let availablePermissions = $derived(allPermissions);
 
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
@@ -101,8 +97,7 @@
       allPermissions = permList;
 
       if (roleList.length > 0) {
-        const allowed = roleList.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'));
-        const defaultRole = allowed.find((r) => r.code === 'ROLE_KHO') || allowed[0] || roleList[0];
+        const defaultRole = roleList.find((r) => r.code === 'ROLE_KHO') || roleList[0];
         handleSelectRole(defaultRole.id);
       }
       if (departments.length > 0) {

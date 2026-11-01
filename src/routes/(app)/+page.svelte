@@ -14,7 +14,6 @@
   import { authStore } from '$core/stores';
 
   let hasAccess = $derived(
-    authStore.isAdminOrDirector ||
     authStore.hasPermission('DASHBOARD_VIEW') ||
     authStore.hasPermission('REPORT_VIEW')
   );

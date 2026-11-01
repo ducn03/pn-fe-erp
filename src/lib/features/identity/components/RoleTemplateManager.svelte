@@ -17,17 +17,13 @@
   let currentPermissionIds = $state<number[]>([]);
   let isSaving = $state(false);
 
-  let availableRoles = $derived(
-    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
-  );
+  let availableRoles = $derived(roles);
 
   let selectedRole = $derived.by(() => {
     return availableRoles.find((r) => r.id === selectedRoleId) || null;
   });
 
-  let availablePermissions = $derived(
-    permissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
-  );
+  let availablePermissions = $derived(permissions);
 
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
@@ -51,8 +47,7 @@
       roles = roleList;
       permissions = permList;
       if (roleList.length > 0) {
-        const first = roleList.find((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN')) || roleList[0];
-        selectRole(first);
+        selectRole(roleList[0]);
       }
     } catch (err: any) {
       toast.error('Lỗi khi nạp dữ liệu vai trò: ' + (err.message || 'Lỗi mạng'));

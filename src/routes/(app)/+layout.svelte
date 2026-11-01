@@ -16,22 +16,22 @@
       heading: sec.heading,
       items: sec.items.filter((item) => {
         if (item.href === '/') {
-          return authStore.isAdminOrDirector || authStore.hasPermission('DASHBOARD_VIEW') || authStore.hasPermission('REPORT_VIEW');
+          return authStore.hasPermission('DASHBOARD_VIEW') || authStore.hasPermission('REPORT_VIEW');
         }
         if (item.href === '/company') {
           return true;
         }
         if (item.href === '/kho') {
-          return authStore.isAdmin || authStore.hasPermission('INVENTORY_VIEW');
+          return authStore.hasPermission('INVENTORY_VIEW');
         }
         if (item.href === '/identity') {
-          return authStore.isAdmin || authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
+          return authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
         }
         if (item.href === '/logs') {
-          return authStore.isAdmin || authStore.hasPermission('LOG_VIEW');
+          return authStore.hasPermission('LOG_VIEW');
         }
         if (item.href === '/health') {
-          return authStore.isAdmin || authStore.hasPermission('HEALTH_VIEW');
+          return authStore.hasPermission('HEALTH_VIEW');
         }
         return true;
       })

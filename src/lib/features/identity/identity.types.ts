@@ -33,6 +33,8 @@ export interface User {
   roleId?: number;
   roleCode?: string;
   roleName?: string;
+  roleLevel?: number;
+  canManage?: boolean;
   roles?: string[];
   role?: string; // Primary role compatibility
   roleIds?: number[];

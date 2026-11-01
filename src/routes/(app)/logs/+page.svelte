@@ -23,7 +23,7 @@
 
   type StatusFilterType = (typeof STATUS_FILTER)[keyof typeof STATUS_FILTER];
 
-  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('LOG_VIEW'));
+  let hasAccess = $derived(authStore.hasPermission('LOG_VIEW'));
   let logs = $state<LoginLogItem[]>([]);
   let totalElements = $state(0);
   let loading = $state(true);
@@ -165,15 +165,13 @@
   ]}
 >
   {#snippet actions()}
-    {#if authStore.isAdmin}
-      <Button variant="secondary" onclick={() => loadLogs(true)} disabled={loading}>
-        {#if loading}
-          Đang làm mới...
-        {:else}
-          Làm mới dữ liệu
-        {/if}
-      </Button>
-    {/if}
+    <Button variant="secondary" onclick={() => loadLogs(true)} disabled={loading}>
+      {#if loading}
+        Đang làm mới...
+      {:else}
+        Làm mới dữ liệu
+      {/if}
+    </Button>
   {/snippet}
 </PageHeader>
 

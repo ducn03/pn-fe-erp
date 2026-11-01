@@ -140,7 +140,7 @@
     <Button variant="secondary" onclick={() => loadData(true)} disabled={loading}>
       {#if loading}Đang làm mới...{:else}Làm mới dữ liệu{/if}
     </Button>
-    {#if authStore.isAdminOrDirector}
+    {#if authStore.hasPermission('COMPANY_MANAGE')}
       <Button variant="primary" onclick={openEditCompanyModal}>
         Chỉnh sửa thông tin
       </Button>
@@ -158,7 +158,7 @@
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
         <Badge variant={BADGE_VARIANTS.SUCCESS}>Hoạt Động</Badge>
-        {#if authStore.isAdminOrDirector}
+        {#if authStore.hasPermission('COMPANY_MANAGE')}
           <Button variant="outline" size="sm" onclick={openEditCompanyModal}>
             Chỉnh sửa
           </Button>
