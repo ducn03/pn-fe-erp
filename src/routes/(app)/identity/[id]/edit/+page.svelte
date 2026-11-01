@@ -4,6 +4,7 @@
     Card,
     Badge,
     Button,
+    Forbidden403,
     toast,
     CARD_ACCENTS,
     BADGE_VARIANTS
@@ -50,6 +51,10 @@
   // Validation & Submit State
   let formErrors = $state<Record<string, string>>({});
   let isSubmitting = $state(false);
+
+  let hasEditPermission = $derived(
+    authStore.isAdmin && (targetUser ? targetUser.canManage !== false : true)
+  );
 
   let availableRoles = $derived(roles);
 
@@ -217,16 +222,7 @@
   <title>Chỉnh Sửa Tài Khoản Nhân Sự | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Chỉnh Sửa Tài Khoản Nhân Sự"
-  subtitle="Cập nhật hồ sơ nhân sự, chức danh vai trò và cấu hình ma trận phân quyền"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Hệ thống' },
-    { label: 'Người dùng', href: '/identity' },
-    { label: 'Chỉnh sửa' }
-  ]}
->
+<PageHeader>
   {#snippet actions()}
     <Button variant="secondary" onclick={() => goto('/identity')}>
       Quay lại danh sách
@@ -234,7 +230,13 @@
   {/snippet}
 </PageHeader>
 
-{#if loadingData}
+{#if !hasEditPermission && !loadingData}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Bạn không có quyền chỉnh sửa hoặc phân quyền tài khoản này. Chức năng quản trị tài khoản chỉ dành cho Quản Trị Viên."
+    requiredPermission="ROLE_ADMIN"
+  />
+{:else if loadingData}
   <Card accent={CARD_ACCENTS.ORANGE}>
     <div style="padding: 40px; text-align: center; color: var(--pn-ink-soft);">
       Đang nạp dữ liệu hồ sơ nhân sự và ma trận phân quyền...
@@ -499,13 +501,15 @@
       <Button variant="secondary" onclick={() => goto('/identity')} disabled={isSubmitting}>
         Hủy bỏ & Quay lại
       </Button>
-      <Button variant="primary" onclick={handleSubmit} disabled={isSubmitting}>
-        {#if isSubmitting}
-          Đang lưu thay đổi...
-        {:else}
-          Lưu thay đổi tài khoản
-        {/if}
-      </Button>
+      {#if hasEditPermission}
+        <Button variant="primary" onclick={handleSubmit} disabled={isSubmitting}>
+          {#if isSubmitting}
+            Đang lưu thay đổi...
+          {:else}
+            Lưu thay đổi tài khoản
+          {/if}
+        </Button>
+      {/if}
     </div>
   </div>
 {/if}

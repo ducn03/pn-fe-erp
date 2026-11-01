@@ -4,6 +4,7 @@
     Card,
     Badge,
     Button,
+    Forbidden403,
     toast,
     CARD_ACCENTS,
     BADGE_VARIANTS
@@ -45,6 +46,10 @@
   let isSubmitting = $state(false);
   let isGeneratingUsername = $state(false);
   let usernameDebounceTimer: any = null;
+
+  let canCreate = $derived(
+    authStore.isAdmin && authStore.hasPermission('USER_MANAGE')
+  );
 
   let availableRoles = $derived(roles);
 
@@ -227,16 +232,7 @@
   <title>Thêm Tài Khoản Nhân Sự | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Thêm Tài Khoản Nhân Sự Mới"
-  subtitle="Khởi tạo tài khoản nhân viên, tự động phát sinh username và cấu hình phân quyền truy cập chi tiết"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Hệ thống' },
-    { label: 'Người dùng', href: '/identity' },
-    { label: 'Thêm mới' }
-  ]}
->
+<PageHeader>
   {#snippet actions()}
     <Button variant="secondary" onclick={() => goto('/identity')}>
       Quay lại danh sách
@@ -244,7 +240,13 @@
   {/snippet}
 </PageHeader>
 
-{#if loadingData}
+{#if !canCreate && !loadingData}
+  <Forbidden403
+    title="Quyền Truy Cập Bị Từ Chối"
+    description="Bạn không có quyền khởi tạo tài khoản nhân sự mới. Chức năng quản trị tài khoản chỉ dành cho Quản Trị Viên."
+    requiredPermission="ROLE_ADMIN"
+  />
+{:else if loadingData}
   <Card accent={CARD_ACCENTS.ORANGE}>
     <div style="padding: 40px; text-align: center; color: var(--pn-ink-soft);">
       Đang nạp danh mục phòng ban và ma trận phân quyền...

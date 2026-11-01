@@ -70,14 +70,7 @@
     requiredPermission="DASHBOARD_VIEW"
   />
 {:else}
-  <PageHeader
-    title="Bàn Làm Việc"
-    subtitle="Tổng quan hệ thống điều hành nguồn lực Premier Nuts ERP"
-    breadcrumbs={[
-      { label: 'Premier Nuts', href: '/' },
-      { label: 'Bàn làm việc' }
-    ]}
-  >
+  <PageHeader>
     {#snippet actions()}
       <Button
         variant="secondary"

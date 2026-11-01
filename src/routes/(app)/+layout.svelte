@@ -15,25 +15,8 @@
     return ERP_NAV_SECTIONS.map((sec) => ({
       heading: sec.heading,
       items: sec.items.filter((item) => {
-        if (item.href === '/') {
-          return authStore.hasPermission('DASHBOARD_VIEW') || authStore.hasPermission('REPORT_VIEW');
-        }
-        if (item.href === '/company') {
-          return true;
-        }
-        if (item.href === '/kho') {
-          return authStore.hasPermission('INVENTORY_VIEW');
-        }
-        if (item.href === '/identity') {
-          return authStore.hasPermission('USER_VIEW') || authStore.hasPermission('USER_MANAGE');
-        }
-        if (item.href === '/logs') {
-          return authStore.hasPermission('LOG_VIEW');
-        }
-        if (item.href === '/health') {
-          return authStore.hasPermission('HEALTH_VIEW');
-        }
-        return true;
+        if (!item.permissions || item.permissions.length === 0) return true;
+        return item.permissions.some((perm) => authStore.hasPermission(perm));
       })
     })).filter((sec) => sec.items.length > 0);
   });

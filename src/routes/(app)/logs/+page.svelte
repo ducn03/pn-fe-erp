@@ -155,15 +155,7 @@
   <title>Nhật Ký Truy Cập & Bất Thường | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Nhật Ký Truy Cập & Giám Sát Bất Thường"
-  subtitle="Theo dõi lịch sử đăng nhập, thiết bị và các cảnh báo an ninh bảo mật hệ thống"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Hệ thống' },
-    { label: 'Nhật ký truy cập' }
-  ]}
->
+<PageHeader>
   {#snippet actions()}
     <Button variant="secondary" onclick={() => loadLogs(true)} disabled={loading}>
       {#if loading}

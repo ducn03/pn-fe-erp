@@ -61,15 +61,7 @@
     requiredPermission="INVENTORY_VIEW"
   />
 {:else}
-<PageHeader
-  title="Kho Hạt & Nguyên Liệu"
-  subtitle="Quản lý chi tiết từng lô hạt, xuất xứ, hạn dùng và giá trị tồn kho"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Kho & Sản xuất' },
-    { label: 'Kho hạt' }
-  ]}
->
+<PageHeader>
   {#snippet actions()}
     <Button variant="secondary" onclick={() => toast.info('Đang xuất báo cáo tồn kho Excel...')}>
       Xuất báo cáo

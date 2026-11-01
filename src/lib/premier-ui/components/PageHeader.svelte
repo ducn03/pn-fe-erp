@@ -1,27 +1,37 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import type { Snippet } from 'svelte';
   import type { BreadcrumbItem } from '../types';
+  import { getRouteMeta } from '$features/navigation';
 
   interface Props {
-    title: string;
+    title?: string;
     subtitle?: string;
     breadcrumbs?: BreadcrumbItem[];
+    leafLabel?: string;
     actions?: Snippet;
   }
 
   let {
     title,
     subtitle,
-    breadcrumbs = [],
+    breadcrumbs,
+    leafLabel,
     actions
   }: Props = $props();
+
+  let autoMeta = $derived(getRouteMeta(page.url.pathname, leafLabel));
+
+  let finalTitle = $derived(title !== undefined ? title : autoMeta.title);
+  let finalSubtitle = $derived(subtitle !== undefined ? subtitle : autoMeta.subtitle);
+  let finalBreadcrumbs = $derived(breadcrumbs !== undefined ? breadcrumbs : autoMeta.breadcrumbs);
 </script>
 
 <header class="pn-page-header">
   <div class="pn-page-header__left">
-    {#if breadcrumbs.length > 0}
+    {#if finalBreadcrumbs.length > 0}
       <nav class="pn-breadcrumb">
-        {#each breadcrumbs as b, i}
+        {#each finalBreadcrumbs as b, i}
           {#if i > 0}<span class="pn-breadcrumb__separator">/</span>{/if}
           {#if b.href}
             <a href={b.href} class="pn-breadcrumb__link">{b.label}</a>
@@ -32,9 +42,9 @@
       </nav>
     {/if}
 
-    <h1 class="pn-page-header__title">{title}</h1>
-    {#if subtitle}
-      <p class="pn-page-header__subtitle">{subtitle}</p>
+    <h1 class="pn-page-header__title">{finalTitle}</h1>
+    {#if finalSubtitle}
+      <p class="pn-page-header__subtitle">{finalSubtitle}</p>
     {/if}
   </div>
 

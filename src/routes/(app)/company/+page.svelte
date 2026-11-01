@@ -127,15 +127,7 @@
   <title>Thông Tin Doanh Nghiệp | Premier Nuts ERP</title>
 </svelte:head>
 
-<PageHeader
-  title="Thông Tin Doanh Nghiệp & Cơ Cấu"
-  subtitle="Quản lý pháp nhân công ty, cơ cấu phòng ban và phân định vai trò nhiệm vụ"
-  breadcrumbs={[
-    { label: 'Premier Nuts', href: '/' },
-    { label: 'Doanh nghiệp' },
-    { label: 'Thông tin chung' }
-  ]}
->
+<PageHeader>
   {#snippet actions()}
     <Button variant="secondary" onclick={() => loadData(true)} disabled={loading}>
       {#if loading}Đang làm mới...{:else}Làm mới dữ liệu{/if}

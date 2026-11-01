@@ -84,9 +84,7 @@
         <th style="min-width: 170px;">Vai trò</th>
         <th style="min-width: 110px;">Trạng thái</th>
         <th style="min-width: 120px;">Ngày tạo</th>
-        {#if authStore.hasPermission('ROLE_ASSIGN') || authStore.hasPermission('USER_MANAGE')}
-          <th style="min-width: 110px; text-align: right;">Thao tác</th>
-        {/if}
+        <th style="min-width: 140px; text-align: right;">Thao tác</th>
       </tr>
     </thead>
     <tbody>
@@ -94,7 +92,16 @@
         {@const roleInfo = getRoleBadge(u.role || (u.roles && u.roles[0]))}
         <tr>
           <td><span class="username-tag">{u.username}</span></td>
-          <td class="font-bold">{u.fullName}</td>
+          <td class="font-bold">
+            <button
+              type="button"
+              class="user-name-link"
+              onclick={() => goto(`/identity/${u.id}`)}
+              title="Nhấn để xem chi tiết tài khoản này"
+            >
+              {u.fullName}
+            </button>
+          </td>
           <td class="text-muted">{u.email}</td>
           <td>{formatDepartment(u)}</td>
           <td>
@@ -106,19 +113,28 @@
             </Badge>
           </td>
           <td class="text-muted font-mono">{DateHelper.formatDate(u.createdAt)}</td>
-          {#if authStore.hasPermission('ROLE_ASSIGN') || authStore.hasPermission('USER_MANAGE')}
-            <td style="text-align: right;">
-              {#if u.canManage !== false}
+          <td style="text-align: right;">
+            <div class="actions-cell">
+              <Button
+                size="sm"
+                variant="ghost"
+                onclick={() => goto(`/identity/${u.id}`)}
+                title="Xem chi tiết hồ sơ tài khoản"
+              >
+                Xem
+              </Button>
+              {#if authStore.isAdmin && authStore.hasPermission('USER_MANAGE') && u.canManage !== false}
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   onclick={() => handleRoleConfig(u)}
+                  title="Sửa thông tin & phân quyền"
                 >
-                  Sửa & Phân quyền
+                  Sửa
                 </Button>
               {/if}
-            </td>
-          {/if}
+            </div>
+          </td>
         </tr>
       {:else}
         <tr>
@@ -164,5 +180,30 @@
     padding: 32px;
     color: var(--pn-ink-soft);
     font-style: italic;
+  }
+
+  .user-name-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--pn-ink);
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s ease;
+  }
+
+  .user-name-link:hover {
+    color: var(--pn-brand);
+    text-decoration: underline;
+  }
+
+  .actions-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
   }
 </style>

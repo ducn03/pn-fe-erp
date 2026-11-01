@@ -94,15 +94,7 @@
     requiredPermission="HEALTH_VIEW"
   />
 {:else}
-  <PageHeader
-    title="Giám Sát Hệ Thống"
-    subtitle="Kiểm tra trạng thái hoạt động thực tế của API Gateway, Identity Service và Cơ sở dữ liệu PostgreSQL"
-    breadcrumbs={[
-      { label: 'Premier Nuts', href: '/' },
-      { label: 'Hệ thống' },
-      { label: 'Giám sát hệ thống' }
-    ]}
-  >
+  <PageHeader>
     {#snippet actions()}
       {#if lastChecked}
         <span class="last-checked">Cập nhật lúc: {lastChecked}</span>

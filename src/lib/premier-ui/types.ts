@@ -15,6 +15,7 @@ export interface NavItem {
   icon?: string;
   active?: boolean;
   badge?: string;
+  permissions?: string[];
 }
 
 export interface NavSection {

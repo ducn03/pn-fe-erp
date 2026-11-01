@@ -66,6 +66,20 @@ export const ERP_MODULE_METAS: Record<string, SystemModuleMeta> = {
     label: 'Quản Trị Hệ Thống',
     color: '#6366F1',
     description: 'Giám sát hạ tầng, kiểm toán an toàn và cấu hình hệ thống'
+  },
+  COMPANY: {
+    code: 'COMPANY',
+    title: 'Hồ Sơ Doanh Nghiệp',
+    label: 'Hồ Sơ Doanh Nghiệp',
+    color: '#0EA5E9',
+    description: 'Hồ sơ pháp lý, thông tin công ty và chi nhánh'
+  },
+  HRM: {
+    code: 'HRM',
+    title: 'Quản Trị Nhân Sự (HRM)',
+    label: 'Quản Trị Nhân Sự (HRM)',
+    color: '#14B8A6',
+    description: 'Hồ sơ nhân viên, hợp đồng lao động, tài chính và tuyển dụng'
   }
 };
 

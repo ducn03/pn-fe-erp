@@ -45,7 +45,7 @@
 </script>
 
 <svelte:head>
-  <title>Quản Lý Người Dùng & Phân Quyền | Premier Nuts ERP</title>
+  <title>Quản Lý Tài Khoản & Phân Quyền | Premier Nuts ERP</title>
 </svelte:head>
 
 {#if !hasAccess}
@@ -55,21 +55,13 @@
     requiredPermission="USER_VIEW"
   />
 {:else}
-  <PageHeader
-    title="Quản Lý Tài Khoản & Phân Quyền"
-    subtitle="Quản trị nhân sự, vai trò nghiệp vụ và phân quyền truy cập hệ thống Premier Nuts"
-    breadcrumbs={[
-      { label: 'Premier Nuts', href: '/' },
-      { label: 'Hệ thống' },
-      { label: 'Quản lý người dùng' }
-    ]}
-  >
+  <PageHeader>
     {#snippet actions()}
       {#if activeTab === 'users'}
         <Button variant="secondary" onclick={() => loadUsers(true)} disabled={loading}>
           {#if loading}Đang làm mới...{:else}Làm mới danh sách{/if}
         </Button>
-        {#if authStore.hasPermission('USER_MANAGE')}
+        {#if authStore.isAdmin && authStore.hasPermission('USER_MANAGE')}
           <Button variant="primary" onclick={() => goto('/identity/create')}>
             + Cấp tài khoản mới
           </Button>
@@ -78,34 +70,36 @@
     {/snippet}
   </PageHeader>
 
-  <!-- Navigation Tabs -->
-  <div class="tabs-nav-bar">
-    <button
-      type="button"
-      class="tab-nav-item"
-      class:active={activeTab === 'users'}
-      onclick={() => (activeTab = 'users')}
-    >
-      Danh Sách Nhân Sự & Tài Khoản ({users.length})
-    </button>
-    <button
-      type="button"
-      class="tab-nav-item"
-      class:active={activeTab === 'templates'}
-      onclick={() => (activeTab = 'templates')}
-    >
-      Khuôn Mẫu Phân Quyền Vai Trò
-    </button>
-  </div>
+  <!-- Navigation Tabs: Chỉ hiển thị tab Khuôn Mẫu Vai Trò cho Quản Trị Viên (Admin) -->
+  {#if authStore.isAdmin}
+    <div class="tabs-nav-bar">
+      <button
+        type="button"
+        class="tab-nav-item"
+        class:active={activeTab === 'users'}
+        onclick={() => (activeTab = 'users')}
+      >
+        Danh Sách Nhân Sự & Tài Khoản ({users.length})
+      </button>
+      <button
+        type="button"
+        class="tab-nav-item"
+        class:active={activeTab === 'templates'}
+        onclick={() => (activeTab = 'templates')}
+      >
+        Khuôn Mẫu Phân Quyền Vai Trò
+      </button>
+    </div>
+  {/if}
 
-  {#if activeTab === 'users'}
+  {#if activeTab === 'users' || !authStore.isAdmin}
     <Card accent="orange">
       <div class="table-header">
         <div>
           <h3 class="table-title">Danh sách nhân sự & quyền hạn</h3>
           <p class="text-muted">Tổng cộng {users.length} tài khoản đang hoạt động trong hệ thống.</p>
         </div>
-        {#if authStore.hasPermission('USER_MANAGE')}
+        {#if authStore.isAdmin && authStore.hasPermission('USER_MANAGE')}
           <Button variant="primary" size="sm" onclick={() => goto('/identity/create')}>
             + Thêm nhân sự mới
           </Button>
@@ -114,7 +108,7 @@
 
       <UserTable bind:users />
     </Card>
-  {:else if activeTab === 'templates'}
+  {:else if activeTab === 'templates' && authStore.isAdmin}
     <RoleTemplateManager />
   {/if}
 {/if}
