@@ -41,6 +41,16 @@ export async function getCurrentUser(): Promise<UserPrincipalData> {
   return envelope.data;
 }
 
-export function logout() {
-  authStore.logout();
+export async function refreshSessionToken(): Promise<boolean> {
+  return await authStore.refreshSession();
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await apiClient.post(ENDPOINTS.IDENTITY.LOGOUT);
+  } catch {
+    // ignore
+  } finally {
+    authStore.logout();
+  }
 }

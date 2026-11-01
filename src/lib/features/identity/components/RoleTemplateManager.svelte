@@ -8,6 +8,7 @@
     type Permission
   } from '$features/company';
   import { authStore } from '$core/stores';
+  import { getModuleMeta } from '$features/identity';
 
   let roles = $state<Role[]>([]);
   let permissions = $state<Permission[]>([]);
@@ -15,17 +16,6 @@
   let selectedRoleId = $state<number | null>(null);
   let currentPermissionIds = $state<number[]>([]);
   let isSaving = $state(false);
-
-  const MODULE_METAS: Record<string, { label: string; color: string }> = {
-    IDENTITY: { label: 'Tài Khoản & Nhân Sự', color: '#3B82F6' },
-    INVENTORY: { label: 'Kho Vận & Vật Tư', color: '#F0821E' },
-    BRANCH: { label: 'Quản Lý Chi Nhánh', color: '#10B981' },
-    FINANCE: { label: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
-    MANUFACTURING: { label: 'Xưởng Sản Xuất', color: '#EC4899' },
-    QC: { label: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { label: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
-    SYSTEM: { label: 'Quản Trị Hệ Thống', color: '#6366F1' }
-  };
 
   let availableRoles = $derived(
     roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
@@ -105,6 +95,9 @@
     isSaving = true;
     try {
       const updated = await updateRolePermissions(selectedRoleId, currentPermissionIds);
+      if (!updated || !updated.id) {
+        throw new Error('Hệ thống có lỗi, vui lòng liên hệ quản trị viên hoặc hệ thống đang bảo trì, vui lòng quay lại sau ít phút nữa.');
+      }
       // Cập nhật lại trong mảng roles
       roles = roles.map((r) => {
         if (r.id === updated.id) {
@@ -118,7 +111,11 @@
       });
       toast.success(`Đã lưu khuôn mẫu quyền cho vai trò "${selectedRole.name}" thành công!`);
     } catch (err: any) {
-      toast.error('Lỗi khi cập nhật khuôn mẫu quyền: ' + (err.message || 'Lỗi hệ thống'));
+      let errMsg = 'Hệ thống có lỗi, vui lòng liên hệ quản trị viên hoặc hệ thống đang bảo trì, vui lòng quay lại sau ít phút nữa.';
+      if (err && err.message) {
+        errMsg = err.message;
+      }
+      toast.error(errMsg);
     } finally {
       isSaving = false;
     }
@@ -180,7 +177,7 @@
 
         <div class="modules-stack">
           {#each Object.entries(groupedPermissions) as [modKey, modPerms] (modKey)}
-            {@const meta = MODULE_METAS[modKey] || { label: modKey, color: '#F0821E' }}
+            {@const meta = getModuleMeta(modKey)}
             <div class="module-card">
               <div class="module-card-header">
                 <div style="display: flex; align-items: center; gap: 8px;">

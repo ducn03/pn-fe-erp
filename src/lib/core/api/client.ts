@@ -3,7 +3,7 @@
  * Communicates with pn-api-gateway or direct microservices
  */
 
-import { API_BASE_URL } from './endpoints';
+import { API_BASE_URL, ENDPOINTS } from './endpoints';
 import { STORAGE_KEYS } from '../constants/storage.constants';
 
 export interface RequestOptions extends RequestInit {
@@ -115,6 +115,63 @@ class ApiClient {
       });
 
       if (!response.ok) {
+        // Tự động làm mới token nếu gặp 401 Unauthorized và có Refresh Token
+        if (
+          response.status === 401 &&
+          !path.includes('/auth/login') &&
+          !path.includes('/auth/refresh') &&
+          typeof localStorage !== 'undefined'
+        ) {
+          const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+          if (refreshToken) {
+            try {
+              localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+              const refreshRes = await fetch(`${this.baseUrl}${ENDPOINTS.IDENTITY.REFRESH}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json'
+                },
+                body: JSON.stringify({ refreshToken })
+              });
+
+              if (refreshRes.ok) {
+                const envelope = await refreshRes.json();
+                const resData = envelope.data;
+                if (resData && resData.accessToken) {
+                  localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, resData.accessToken);
+                  if (resData.refreshToken) {
+                    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, resData.refreshToken);
+                  }
+                  if (resData.user) {
+                    localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(resData.user));
+                  }
+
+                  // Thử lại request ban đầu với Access Token mới
+                  finalHeaders['Authorization'] = `Bearer ${resData.accessToken}`;
+                  const retryResponse = await fetch(url, {
+                    ...rest,
+                    headers: finalHeaders
+                  });
+
+                  if (retryResponse.ok) {
+                    if (retryResponse.status === 204) {
+                      return null as unknown as T;
+                    }
+                    return (await retryResponse.json()) as T;
+                  }
+                }
+              } else {
+                localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+              }
+            } catch {
+              // Refresh failure
+            }
+          }
+        }
+
         let errorData: any = null;
         try {
           errorData = await response.json();
@@ -122,17 +179,32 @@ class ApiClient {
           errorData = await response.text();
         }
 
+        let code: string | undefined = undefined;
         let msg = `Yêu cầu thất bại (HTTP ${response.status})`;
-        if (errorData) {
-          if (errorData.message) {
-            msg = errorData.message;
-          } else if (errorData.error) {
-            msg = errorData.error;
+
+        if (errorData && typeof errorData === 'object') {
+          if (errorData.meta && typeof errorData.meta === 'object') {
+            code = errorData.meta.code;
+            if (errorData.meta.message) {
+              msg = errorData.meta.message;
+            }
+            if (Array.isArray(errorData.meta.errors) && errorData.meta.errors.length > 0) {
+              msg = errorData.meta.errors[0];
+            }
+          } else {
+            if (errorData.message) {
+              msg = errorData.message;
+            } else if (errorData.error) {
+              msg = errorData.error;
+            }
+            if (errorData.code) {
+              code = errorData.code;
+            }
           }
         }
-        let code: string | undefined = undefined;
-        if (errorData && errorData.code) {
-          code = errorData.code;
+
+        if (response.status >= 500 || (code && code.startsWith('5'))) {
+          msg = 'Hệ thống có lỗi, vui lòng liên hệ quản trị viên hoặc hệ thống đang bảo trì, vui lòng quay lại sau ít phút nữa.';
         }
 
         throw new ApiError(msg, response.status, code, errorData);
@@ -143,6 +215,25 @@ class ApiClient {
       }
 
       const json = await response.json();
+
+      // Kiểm tra phong bì phản hồi Envelope { meta, data }
+      if (json && typeof json === 'object') {
+        const meta = (json as any).meta;
+        if (meta && typeof meta === 'object') {
+          const metaCode = String(meta.code || '');
+          if (metaCode && metaCode !== '200' && metaCode !== '0') {
+            let errorMsg = meta.message || `Yêu cầu không thành công (Mã lỗi ${metaCode})`;
+            if (Array.isArray(meta.errors) && meta.errors.length > 0) {
+              errorMsg = meta.errors[0];
+            }
+            if (metaCode.startsWith('5') || metaCode === '50000001') {
+              errorMsg = 'Hệ thống có lỗi, vui lòng liên hệ quản trị viên hoặc hệ thống đang bảo trì, vui lòng quay lại sau ít phút nữa.';
+            }
+            throw new ApiError(errorMsg, response.status, metaCode, json);
+          }
+        }
+      }
+
       return json as T;
     } catch (err: any) {
       if (err instanceof ApiError) {

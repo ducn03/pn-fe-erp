@@ -163,6 +163,53 @@ export async function generateUsername(fullName: string): Promise<string> {
   return (res as any)?.data || res || '';
 }
 
+export async function getUserById(id: number | string): Promise<User> {
+  const res = await apiClient.get<ApiEnvelope<any> | any>(`/api/v1/users/${id}`);
+  const u = (res as any)?.data || res;
+  let primaryRole = 'Nhân Viên';
+  if (u.roleName) {
+    primaryRole = u.roleName;
+  } else if (u.roleCode) {
+    primaryRole = u.roleCode;
+  } else if (u.roles && Array.isArray(u.roles) && u.roles.length > 0) {
+    primaryRole = u.roles[0];
+  } else if (u.role) {
+    primaryRole = u.role;
+  }
+
+  let deptName = '';
+  if (u.departmentName) {
+    deptName = u.departmentName;
+  } else if (u.department) {
+    deptName = u.department;
+  }
+
+  return {
+    id: u.id,
+    username: u.username,
+    fullName: u.fullName || u.username,
+    email: u.email || '',
+    phone: u.phone,
+    avatarUrl: u.avatarUrl,
+    departmentId: u.departmentId,
+    departmentName: deptName,
+    department: deptName,
+    companyId: u.companyId,
+    status: u.status,
+    roleId: u.roleId,
+    roleCode: u.roleCode,
+    roleName: u.roleName,
+    roles: u.roles || [],
+    role: primaryRole,
+    roleIds: u.roleIds || [],
+    permissionIds: u.permissionIds || [],
+    permissions: u.permissions || [],
+    lastLoginAt: u.lastLoginAt,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt
+  };
+}
+
 export async function updateUser(id: number | string, input: any): Promise<User> {
   const res = await apiClient.put<ApiEnvelope<any> | any>(`/api/v1/users/${id}`, input);
   const updated = (res as any)?.data || res;

@@ -13,7 +13,11 @@
   import { getUsers, UserTable, type User } from '$features/identity';
   import { authStore } from '$core/stores';
 
-  let hasAccess = $derived(authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW'));
+  let hasAccess = $derived(
+    authStore.isAdminOrDirector ||
+    authStore.hasPermission('DASHBOARD_VIEW') ||
+    authStore.hasPermission('REPORT_VIEW')
+  );
   let metrics = $state<any[]>([]);
   let recentUsers = $state<User[]>([]);
   let refreshing = $state(false);

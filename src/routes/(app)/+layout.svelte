@@ -16,7 +16,7 @@
       heading: sec.heading,
       items: sec.items.filter((item) => {
         if (item.href === '/') {
-          return authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW');
+          return authStore.isAdminOrDirector || authStore.hasPermission('DASHBOARD_VIEW') || authStore.hasPermission('REPORT_VIEW');
         }
         if (item.href === '/company') {
           return true;

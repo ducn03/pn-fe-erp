@@ -12,6 +12,7 @@
   } from '$features/company';
   import { createUser } from '../identity.api';
   import type { User } from '../identity.types';
+  import { getModuleMeta } from '../identity.constants';
 
   interface Props {
     open: boolean;
@@ -41,15 +42,7 @@
   let passwordError = $state('');
   let roleError = $state('');
 
-  const MODULE_TITLES: Record<string, string> = {
-    IDENTITY: 'Quản Trị Người Dùng & Phân Quyền',
-    MANAGEMENT: 'Ban Giám Đốc & Điều Hành',
-    BRANCH: 'Quản Lý Chi Nhánh',
-    INVENTORY: 'Kho Vận & Nông Sản',
-    FINANCE: 'Tài Chính & Kế Toán',
-    MANUFACTURING: 'Chế Biến & Sản Xuất',
-    QC: 'Kiểm Định Chất Lượng'
-  };
+
 
   // Nạp dữ liệu động từ backend
   $effect(() => {
@@ -436,7 +429,7 @@
                 <div class="module-card-header">
                   <div class="module-info">
                     <span class="module-code-badge">{modCode}</span>
-                    <span class="module-title">{MODULE_TITLES[modCode] || modCode}</span>
+                    <span class="module-title">{getModuleMeta(modCode).title}</span>
                   </div>
                   <div class="module-actions">
                     {#if isAllChecked}

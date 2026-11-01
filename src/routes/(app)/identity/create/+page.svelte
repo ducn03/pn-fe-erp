@@ -12,7 +12,8 @@
   import { authStore } from '$core/stores';
   import {
     createUser,
-    generateUsername
+    generateUsername,
+    getModuleMeta
   } from '$features/identity';
   import {
     getDepartments,
@@ -45,17 +46,7 @@
   let isGeneratingUsername = $state(false);
   let usernameDebounceTimer: any = null;
 
-  // Nhóm quyền theo Module
-  const MODULE_TITLES: Record<string, { title: string; color: string }> = {
-    IDENTITY: { title: 'Tài Khoản & Nhân Sự', color: '#3B82F6' },
-    INVENTORY: { title: 'Kho Vận & Vật Tư', color: '#F0821E' },
-    BRANCH: { title: 'Quản Lý Chi Nhánh', color: '#10B981' },
-    FINANCE: { title: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
-    MANUFACTURING: { title: 'Xưởng Sản Xuất Chế Biến', color: '#EC4899' },
-    QC: { title: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
-    SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
-  };
+
 
   let availableRoles = $derived(
     roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
@@ -368,7 +359,7 @@
                   <div class="role-item-header">
                     <span class="role-item-name">{r.name}</span>
                     {#if selectedRoleId === r.id}
-                      <span class="check-icon">✓</span>
+                      <Badge variant={BADGE_VARIANTS.PRIMARY}>Đang chọn</Badge>
                     {/if}
                   </div>
                   <div class="role-item-desc">{r.description}</div>
@@ -408,7 +399,7 @@
           {#if showCustomPermissions}
             <div class="permissions-matrix-wrap">
               {#each Object.entries(groupedPermissions) as [moduleKey, perms] (moduleKey)}
-                {@const modInfo = MODULE_TITLES[moduleKey] || { title: moduleKey, color: '#F0821E' }}
+                {@const modInfo = getModuleMeta(moduleKey)}
                 <div class="permission-module-block">
                   <div class="module-header">
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -676,19 +667,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-
-  .check-icon {
-    font-size: 12px;
-    font-weight: 800;
-    color: #FFF;
-    background: var(--pn-orange, #F0821E);
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .role-item-name {

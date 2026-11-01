@@ -24,7 +24,7 @@
   let formError = $state('');
 
   function getPostLoginRedirect(): string {
-    if (authStore.isAdmin || authStore.hasPermission('DASHBOARD_VIEW')) {
+    if (authStore.isAdminOrDirector || authStore.hasPermission('DASHBOARD_VIEW') || authStore.hasPermission('REPORT_VIEW')) {
       return '/';
     }
     if (authStore.hasPermission('INVENTORY_VIEW')) {

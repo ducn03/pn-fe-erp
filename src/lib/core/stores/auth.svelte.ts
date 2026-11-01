@@ -1,7 +1,11 @@
 /**
  * Global Authentication & Authorization Store powered by Svelte 5 Runes
+ *
+ * Single Source of Truth: Quyền hạn (Permissions) và Vai trò (Roles) được giải mã
+ * trực tiếp từ JWT Access Token & Backend Session, tuyệt đối không hardcode.
  */
 import { STORAGE_KEYS } from '../constants/storage.constants';
+import { API_BASE_URL, ENDPOINTS } from '../api/endpoints';
 
 export interface AuthUser {
   id: number | string;
@@ -9,52 +13,64 @@ export interface AuthUser {
   fullName: string;
   email: string;
   roles: string[];
-  permissions?: string[];
+  permissions: string[];
   companyId?: number;
 }
 
-// Role to default permissions mapping
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  SUPER_ADMIN: ['*'],
-  ROLE_ADMIN: ['*'],
-  ROLE_DIRECTOR: [
-    'USER_VIEW',
-    'USER_MANAGE',
-    'ROLE_ASSIGN',
-    'INVENTORY_VIEW',
-    'INVENTORY_IMPORT',
-    'INVENTORY_EXPORT',
-    'INVENTORY_AUDIT',
-    'BRANCH_MANAGE',
-    'BRANCH_INVENTORY_VIEW',
-    'FINANCE_VIEW',
-    'FINANCE_MANAGE',
-    'MANUFACTURING_VIEW',
-    'MANUFACTURING_EXECUTE',
-    'QC_VIEW',
-    'QC_INSPECT',
-    'DIRECTOR_APPROVE',
-    'REPORT_VIEW',
-    'COMPANY_VIEW'
-  ],
-  ROLE_BRANCH_MANAGER: ['BRANCH_MANAGE', 'BRANCH_INVENTORY_VIEW', 'USER_VIEW', 'COMPANY_VIEW'],
-  ROLE_KHO: ['INVENTORY_VIEW', 'INVENTORY_IMPORT', 'INVENTORY_EXPORT', 'INVENTORY_AUDIT', 'COMPANY_VIEW'],
-  ROLE_KE_TOAN: ['FINANCE_VIEW', 'FINANCE_MANAGE', 'COMPANY_VIEW', 'USER_VIEW'],
-  ROLE_SAN_XUAT: ['MANUFACTURING_VIEW', 'MANUFACTURING_EXECUTE', 'INVENTORY_VIEW', 'COMPANY_VIEW'],
-  ROLE_QC: ['QC_VIEW', 'QC_INSPECT', 'INVENTORY_VIEW', 'COMPANY_VIEW']
-};
+interface JwtPayload {
+  sub?: string;
+  userId?: number | string;
+  companyId?: number;
+  roles?: string[];
+  permissions?: string[];
+  type?: string;
+  exp?: number;
+}
+
+/**
+ * Giải mã an toàn claims từ JWT token (hỗ trợ UTF-8)
+ */
+function parseJwtPayload(token: string): JwtPayload | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
 class AuthStore {
   user = $state<AuthUser | null>(null);
   token = $state<string | null>(null);
   isAuthenticated = $derived(!!this.token);
 
-  // Quyền Quản trị viên tối cao
+  // Quyền Quản trị viên tối cao (Super Admin / Admin)
   isAdmin = $derived(
     !!this.user?.roles?.some(
       (r) => r === 'ROLE_ADMIN' || r === 'SUPER_ADMIN'
     )
   );
+
+  // Cấp bậc Ban Giám Đốc (Director)
+  isDirector = $derived(
+    !!this.user?.roles?.some(
+      (r) => r === 'ROLE_DIRECTOR'
+    )
+  );
+
+  // Cấp bậc Lãnh đạo cấp cao (Admin hoặc Giám Đốc)
+  isAdminOrDirector = $derived(this.isAdmin || this.isDirector);
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
@@ -69,9 +85,32 @@ class AuthStore {
 
       if (savedToken) {
         this.token = savedToken;
-      }
-      if (savedUserStr) {
-        this.user = JSON.parse(savedUserStr);
+        const jwtPayload = parseJwtPayload(savedToken);
+        let parsedUser: Partial<AuthUser> = {};
+        if (savedUserStr) {
+          try {
+            parsedUser = JSON.parse(savedUserStr);
+          } catch {
+            parsedUser = {};
+          }
+        }
+
+        // Ưu tiên trích xuất roles và permissions trực tiếp từ JWT Token
+        const roles = jwtPayload?.roles || parsedUser.roles || [];
+        const permissions = jwtPayload?.permissions || parsedUser.permissions || [];
+        const username = jwtPayload?.sub || parsedUser.username || '';
+        const userId = jwtPayload?.userId || parsedUser.id || 0;
+        const companyId = jwtPayload?.companyId || parsedUser.companyId;
+
+        this.user = {
+          id: userId,
+          username: username,
+          fullName: parsedUser.fullName || username,
+          email: parsedUser.email || `${username}@premiernuts.vn`,
+          roles: roles,
+          permissions: permissions,
+          companyId: companyId
+        };
       }
     } catch {
       // Storage access error or corrupt JSON
@@ -80,6 +119,18 @@ class AuthStore {
 
   setSession(token: string, user: AuthUser, refreshToken?: string) {
     this.token = token;
+
+    // Đồng bộ roles và permissions trực tiếp từ JWT payload
+    const jwtPayload = parseJwtPayload(token);
+    if (jwtPayload) {
+      if (jwtPayload.roles && jwtPayload.roles.length > 0) {
+        user.roles = jwtPayload.roles;
+      }
+      if (jwtPayload.permissions && jwtPayload.permissions.length > 0) {
+        user.permissions = jwtPayload.permissions;
+      }
+    }
+
     this.user = user;
 
     if (typeof localStorage !== 'undefined') {
@@ -102,34 +153,95 @@ class AuthStore {
     }
   }
 
+  /**
+   * Cập nhật phiên làm việc bằng Refresh Token:
+   * Xóa Access Token cũ, dùng Refresh Token gửi lên Backend để nhận Access Token mới
+   * mang toàn bộ quyền hạn và thông tin mới nhất từ Database.
+   */
+  async refreshSession(): Promise<boolean> {
+    if (typeof localStorage === 'undefined') {
+      return false;
+    }
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    if (!refreshToken) {
+      return false;
+    }
+
+    try {
+      // 1. Xóa access token cũ
+      localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+
+      // 2. Gửi request cấp lại access token mới
+      const res = await fetch(`${API_BASE_URL}${ENDPOINTS.IDENTITY.REFRESH}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (!res.ok) {
+        this.logout();
+        return false;
+      }
+
+      const envelope = await res.json();
+      const resData = envelope.data;
+      if (resData && resData.accessToken) {
+        const u = resData.user;
+        const sessionUser: AuthUser = {
+          id: u.userId,
+          username: u.username,
+          fullName: this.user?.fullName || u.username,
+          email: this.user?.email || `${u.username}@premiernuts.vn`,
+          roles: u.roles || [],
+          permissions: u.permissions || [],
+          companyId: u.companyId
+        };
+        this.setSession(resData.accessToken, sessionUser, resData.refreshToken || refreshToken);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   hasRole(role: string): boolean {
-    if (!this.user || !this.user.roles) return false;
+    if (!this.user || !this.user.roles) {
+      return false;
+    }
     return this.user.roles.includes(role);
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    if (!this.user || !this.user.roles) {
+      return false;
+    }
+    return roles.some((r) => this.user!.roles.includes(r));
   }
 
   /**
    * Kiểm tra quyền hạn chi tiết (Permission)
+   * 1. Admin luôn có toàn quyền hệ thống (return true).
+   * 2. Quyền được so khớp trực tiếp từ permissions giải mã từ JWT token / Backend session.
+   * Tuyệt đối không fallback vào bất kỳ mảng hardcode nào.
    */
   hasPermission(permission: string): boolean {
-    if (!this.user) return false;
-    if (this.isAdmin) return true;
+    if (!this.user) {
+      return false;
+    }
+    if (this.isAdmin) {
+      return true;
+    }
 
-    // 1. Kiểm tra trực tiếp từ danh sách permissions của User
     if (this.user.permissions && this.user.permissions.length > 0) {
       if (this.user.permissions.includes('*') || this.user.permissions.includes(permission)) {
         return true;
       }
     }
 
-    // 2. Tương thích ngược: kiểm tra từ template role
-    if (this.user.roles && this.user.roles.length > 0) {
-      for (const r of this.user.roles) {
-        const perms = ROLE_PERMISSIONS[r] || [];
-        if (perms.includes('*') || perms.includes(permission)) {
-          return true;
-        }
-      }
-    }
     return false;
   }
 

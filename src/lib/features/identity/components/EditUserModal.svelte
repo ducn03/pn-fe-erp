@@ -8,7 +8,8 @@
   } from '$ui';
   import { authStore } from '$core/stores';
   import type { User } from '../identity.types';
-  import { updateUser } from '../identity.api';
+  import { updateUser, getUserById } from '../identity.api';
+  import { getModuleMeta } from '../identity.constants';
   import {
     getDepartments,
     getRoles,
@@ -45,16 +46,7 @@
   let formErrors = $state<Record<string, string>>({});
   let isSubmitting = $state(false);
 
-  const MODULE_TITLES: Record<string, { title: string; color: string }> = {
-    IDENTITY: { title: 'Tài Khoản & Nhân Sự', color: '#3B82F6' },
-    INVENTORY: { title: 'Kho Vận & Vật Tư', color: '#F0821E' },
-    BRANCH: { title: 'Quản Lý Chi Nhánh', color: '#10B981' },
-    FINANCE: { title: 'Tài Chính & Kế Toán', color: '#8B5CF6' },
-    MANUFACTURING: { title: 'Xưởng Sản Xuất Chế Biến', color: '#EC4899' },
-    QC: { title: 'Kiểm Định Chất Lượng', color: '#06B6D4' },
-    MANAGEMENT: { title: 'Ban Giám Đốc & Điều Hành', color: '#F59E0B' },
-    SYSTEM: { title: 'Quản Trị Hệ Thống', color: '#6366F1' }
-  };
+
 
   let availableRoles = $derived(
     roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
@@ -94,6 +86,17 @@
     }
   }
 
+  async function fetchUserDetail(userId: number | string) {
+    try {
+      const detail = await getUserById(userId);
+      if (detail && Array.isArray(detail.permissionIds) && detail.permissionIds.length > 0) {
+        selectedPermissionIds = [...detail.permissionIds];
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   $effect(() => {
     if (open) {
       loadMetadata();
@@ -105,17 +108,12 @@
         selectedDepartmentId = user.departmentId;
         selectedRoleId = user.roleId;
 
+        // Điền quyền trực tiếp từ User Permission của tài khoản này
         if (Array.isArray(user.permissionIds) && user.permissionIds.length > 0) {
           selectedPermissionIds = [...user.permissionIds];
-        } else if (user.roleId && roles.length > 0) {
-          const r = roles.find((item) => item.id === user.roleId);
-          if (r && Array.isArray(r.permissionIds)) {
-            selectedPermissionIds = [...r.permissionIds];
-          } else {
-            selectedPermissionIds = [];
-          }
         } else {
-          selectedPermissionIds = [];
+          // Nạp chi tiết từ API để lấy chính xác user permissions trong DB
+          fetchUserDetail(user.id);
         }
       }
       formErrors = {};
@@ -126,9 +124,15 @@
   function handleSelectRole(roleId: number) {
     selectedRoleId = roleId;
     delete formErrors.roleId;
-    const r = roles.find((item) => item.id === roleId);
+    // Chú ý: Khi update, giữ nguyên quyền riêng của user (KHÔNG tự động đè từ template)
+  }
+
+  function applyRoleTemplatePermissions() {
+    if (!selectedRoleId) return;
+    const r = roles.find((item) => item.id === selectedRoleId);
     if (r && Array.isArray(r.permissionIds)) {
       selectedPermissionIds = [...r.permissionIds];
+      toast.info(`Đã nạp bộ quyền mẫu của vai trò "${r.name}"`);
     }
   }
 
@@ -198,6 +202,13 @@
 
       const updated = await updateUser(user.id, payload);
       toast.success(`Cập nhật thông tin và phân quyền cho ${trimmedFullName} thành công!`);
+
+      // Nếu người vừa được sửa chính là tài khoản đang đăng nhập hiện tại
+      if (String(user.id) === String(authStore.user?.id)) {
+        await authStore.refreshSession();
+        toast.info('Phiên làm việc đã được cập nhật quyền hạn mới!');
+      }
+
       onsave(updated);
       onclose();
     } catch (err: any) {
@@ -329,23 +340,34 @@
             <strong>{selectedPermissionIds.length}</strong> / {availablePermissions.length} quyền
           </span>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onclick={() => (showCustomPermissions = !showCustomPermissions)}
-        >
-          {#if showCustomPermissions}
-            Thu gọn danh sách quyền
-          {:else}
-            Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
+        <div style="display: flex; gap: 8px; align-items: center;">
+          {#if selectedRoleId}
+            <Button
+              variant="ghost"
+              size="sm"
+              onclick={applyRoleTemplatePermissions}
+            >
+              🔄 Điền lại theo mẫu vai trò
+            </Button>
           {/if}
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onclick={() => (showCustomPermissions = !showCustomPermissions)}
+          >
+            {#if showCustomPermissions}
+              Thu gọn danh sách quyền
+            {:else}
+              Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
+            {/if}
+          </Button>
+        </div>
       </div>
 
       {#if showCustomPermissions}
         <div class="perm-matrix-wrap">
           {#each Object.entries(groupedPermissions) as [modKey, perms] (modKey)}
-            {@const mod = MODULE_TITLES[modKey] || { title: modKey, color: '#D96B27' }}
+            {@const mod = getModuleMeta(modKey)}
             <div class="mod-group">
               <div class="mod-head">
                 <div style="display: flex; align-items: center; gap: 8px;">
