@@ -280,7 +280,8 @@
         <input
           id="companyName"
           type="text"
-          class="form-input {formErrors.name ? 'is-invalid' : ''}"
+          class="form-input"
+          class:is-invalid={!!formErrors.name}
           bind:value={editForm.name}
           placeholder="Nhập tên chính thức của công ty"
         />
