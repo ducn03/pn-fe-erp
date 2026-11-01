@@ -256,283 +256,282 @@
     </div>
   </Card>
 {:else}
-  <div class="create-user-container">
-    <div class="form-grid">
-      <!-- Cột 1: Thông tin cơ bản & Hồ sơ tóm tắt (Stack) -->
-      <div class="left-col-stack">
-        <Card accent={CARD_ACCENTS.ORANGE}>
-          <div class="card-header-styled">
-            <h3 class="card-section-title">1. Thông Tin Nhân Sự & Đăng Nhập</h3>
-            <p class="card-section-desc">Thông tin cá nhân và tài khoản truy cập Premier Nuts ERP</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Họ và tên -->
-            <div class="form-group">
-              <label for="fullNameInput" class="form-label required">Họ và Tên Nhân Sự</label>
-              <input
-                id="fullNameInput"
-                type="text"
-                class="form-input"
-                class:is-invalid={Boolean(formErrors.fullName)}
-                value={fullName}
-                oninput={handleFullNameInput}
-                placeholder="Ví dụ: Nguyễn Đình Đức, John Smith..."
-              />
-              {#if formErrors.fullName}
-                <span class="field-error-text">{formErrors.fullName}</span>
-              {:else}
-                <span class="field-hint-text">Quy tắc: Nhập tối thiểu 2 từ để hệ thống tự động sinh tên đăng nhập.</span>
-              {/if}
-            </div>
-
-            <!-- Tên đăng nhập (Tự phát sinh - Preview Badge) -->
-            <div class="form-group">
-              <div class="label-with-badge">
-                <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
-                <Badge variant={BADGE_VARIANTS.PRIMARY}>Tự động tạo</Badge>
-              </div>
-              <div class="auto-username-box">
-                {#if isGeneratingUsername}
-                  <span class="generating-text">Đang phân tích họ tên và sinh mã định danh...</span>
-                {:else if autoUsername}
-                  <div class="username-display">
-                    <span class="username-at">@</span>
-                    <span class="username-code">{autoUsername}</span>
-                    <span class="username-status">Khả dụng</span>
-                  </div>
-                {:else}
-                  <span class="placeholder-text">Sẽ tự động tạo khi bạn nhập họ tên hợp lệ ở trên</span>
-                {/if}
-              </div>
-            </div>
-
-            <!-- Mật khẩu ban đầu -->
-            <div class="form-group">
-              <label for="passwordInput" class="form-label required">Mật Khẩu Đăng Nhập Ban Đầu</label>
-              <input
-                id="passwordInput"
-                type="text"
-                class="form-input"
-                class:is-invalid={Boolean(formErrors.password)}
-                bind:value={password}
-                placeholder="Tối thiểu 6 ký tự"
-              />
-              {#if formErrors.password}
-                <span class="field-error-text">{formErrors.password}</span>
-              {/if}
-            </div>
-
-            <!-- Email & Số điện thoại -->
-            <div class="form-row-2">
-              <div class="form-group">
-                <label for="emailInput" class="form-label">Email Doanh Nghiệp</label>
-                <input
-                  id="emailInput"
-                  type="email"
-                  class="form-input"
-                  bind:value={email}
-                  placeholder="duc.nguyen@premiernuts.vn"
-                />
-              </div>
-              <div class="form-group">
-                <label for="phoneInput" class="form-label">Số Điện Thoại</label>
-                <input
-                  id="phoneInput"
-                  type="text"
-                  class="form-input"
-                  bind:value={phone}
-                  placeholder="Ví dụ: 0912345678"
-                />
-              </div>
-            </div>
-
-            <!-- Phòng ban -->
-            <div class="form-group">
-              <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
-              <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
-                {#each departments as dept (dept.id)}
-                  <option value={dept.id}>{dept.name}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-        </Card>
-
-        <!-- Thẻ tóm tắt hồ sơ & Cấp bậc phân quyền -->
-        <Card accent={CARD_ACCENTS.ORANGE}>
-          <div class="card-header-styled">
-            <h3 class="card-section-title">Hồ Sơ & Trạng Thái Khởi Tạo</h3>
-            <p class="card-section-desc">Tổng quan thông số định danh và mức độ phân quyền tài khoản</p>
-          </div>
-
-          <div class="account-overview-box">
-            <div class="profile-header-flex">
-              <div class="profile-avatar-circle">{userInitials}</div>
-              <div class="profile-meta-info">
-                <div class="profile-name-text">{fullName || 'Chưa nhập họ tên'}</div>
-                <div class="profile-username-sub">@{autoUsername || 'auto_username'}</div>
-                <div class="profile-status-pill">
-                  <span class="status-indicator-dot"></span>
-                  <span class="status-indicator-text">Sẵn sàng khởi tạo</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="overview-stats-grid">
-              <div class="stat-mini-card">
-                <span class="stat-label">Phòng Ban</span>
-                <span class="stat-value">{selectedDepartment?.name || 'Chưa phân bổ'}</span>
-              </div>
-              <div class="stat-mini-card">
-                <span class="stat-label">Chức Danh Vai Trò</span>
-                <span class="stat-value">{selectedRole?.name || 'Chưa chọn'}</span>
-              </div>
-              <div class="stat-mini-card">
-                <span class="stat-label">Quyền Hạn Kích Hoạt</span>
-                <span class="stat-value highlight-green">{selectedPermissionIds.length} quyền hạn</span>
-              </div>
-              <div class="stat-mini-card">
-                <span class="stat-label">Cấp Bậc Quản Trị</span>
-                <span class="stat-value">Cấp {selectedRole?.level || 99}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="security-notes-section">
-            <div class="security-note-item">
-              <span class="note-bullet-dot"></span>
-              <span class="note-text"><strong>Nguyên tắc phân quyền:</strong> Phân bổ quyền hạn theo đúng phạm vi trách nhiệm nghiệp vụ.</span>
-            </div>
-            <div class="security-note-item">
-              <span class="note-bullet-dot"></span>
-              <span class="note-text"><strong>Mật khẩu ban đầu:</strong> Nhân viên sẽ được yêu cầu đổi mật khẩu trong lần đăng nhập đầu tiên.</span>
-            </div>
-            <div class="security-note-item">
-              <span class="note-bullet-dot"></span>
-              <span class="note-text"><strong>Nhật ký bảo mật:</strong> Mọi thao tác tạo lập tài khoản được lưu vết tự động trong Audit Log.</span>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <!-- Cột 2: Vai trò & Phân quyền -->
+  <div class="user-page-container">
+    <!-- HÀNG 1: Thông tin nhân sự & Đăng nhập CÙNG HÀNG với Hồ sơ & Trạng thái -->
+    <div class="top-row-grid">
+      <!-- Cột trái: Form nhập thông tin nhân sự & đăng nhập -->
       <Card accent={CARD_ACCENTS.ORANGE}>
         <div class="card-header-styled">
-          <h3 class="card-section-title">2. Thiết Lập Vai Trò & Phân Quyền</h3>
-          <p class="card-section-desc">Chọn chức danh mẫu và tùy biến các quyền hạn thực thi trực tiếp</p>
+          <h3 class="card-section-title">1. Thông Tin Nhân Sự & Đăng Nhập</h3>
+          <p class="card-section-desc">Thông tin cá nhân và tài khoản truy cập Premier Nuts ERP</p>
         </div>
 
         <div class="form-fields">
-          <!-- Chọn Vai Trò Mẫu -->
+          <!-- Họ và tên -->
           <div class="form-group">
-            <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu</label>
-            <div class="role-cards-grid">
-              {#each availableRoles as r (r.id)}
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <!-- svelte-ignore a11y_no_static_element_interactions -->
-                <div
-                  class="role-card-item"
-                  class:is-selected={selectedRoleId === r.id}
-                  onclick={() => handleSelectRole(r.id)}
-                >
-                  <div class="role-item-header">
-                    <span class="role-item-name">{r.name}</span>
-                    {#if selectedRoleId === r.id}
-                      <span class="role-selected-check" title="Đã chọn vai trò này">
-                        <svg viewBox="0 0 20 20" fill="currentColor" class="check-icon-svg">
-                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                        </svg>
-                      </span>
-                    {/if}
-                  </div>
-                  <div class="role-item-desc">{r.description}</div>
-                  <div class="role-item-perm-count">
-                    {r.permissionIds?.length || 0} quyền hạn mặc định
-                  </div>
-                </div>
-              {/each}
-            </div>
-            {#if formErrors.roleId}
-              <span class="field-error-text">{formErrors.roleId}</span>
+            <label for="fullNameInput" class="form-label required">Họ và Tên Nhân Sự</label>
+            <input
+              id="fullNameInput"
+              type="text"
+              class="form-input"
+              class:is-invalid={Boolean(formErrors.fullName)}
+              value={fullName}
+              oninput={handleFullNameInput}
+              placeholder="Ví dụ: Nguyễn Đình Đức, John Smith..."
+            />
+            {#if formErrors.fullName}
+              <span class="field-error-text">{formErrors.fullName}</span>
+            {:else}
+              <span class="field-hint-text">Quy tắc: Nhập tối thiểu 2 từ để hệ thống tự động sinh tên đăng nhập.</span>
             {/if}
           </div>
 
-          <!-- Banner Tùy Biến Permissions -->
-          <div class="custom-perm-toggle-banner">
-            <div>
-              <div class="toggle-title">Ma Trận Quyền Hạn Chi Tiết Cho Tài Khoản Này</div>
-              <div class="toggle-subtitle">
-                Đang kích hoạt <strong>{selectedPermissionIds.length}</strong> / {availablePermissions.length} quyền hệ thống.
-              </div>
+          <!-- Tên đăng nhập (Tự phát sinh - Preview Badge) -->
+          <div class="form-group">
+            <div class="label-with-badge">
+              <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
+              <Badge variant={BADGE_VARIANTS.PRIMARY}>Tự động tạo</Badge>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onclick={() => (showCustomPermissions = !showCustomPermissions)}
-            >
-              {#if showCustomPermissions}
-                Thu gọn danh sách quyền
+            <div class="auto-username-box">
+              {#if isGeneratingUsername}
+                <span class="generating-text">Đang phân tích họ tên và sinh mã định danh...</span>
+              {:else if autoUsername}
+                <div class="username-display">
+                  <span class="username-at">@</span>
+                  <span class="username-code">{autoUsername}</span>
+                  <span class="username-status">Khả dụng</span>
+                </div>
               {:else}
-                Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
+                <span class="placeholder-text">Sẽ tự động tạo khi bạn nhập họ tên hợp lệ ở trên</span>
               {/if}
-            </Button>
+            </div>
           </div>
 
-          <!-- Danh sách permissions mở rộng -->
-          {#if showCustomPermissions}
-            <div class="permissions-matrix-wrap">
-              {#each Object.entries(groupedPermissions) as [moduleKey, perms] (moduleKey)}
-                {@const modInfo = getModuleMeta(moduleKey)}
-                <div class="permission-module-block">
-                  <div class="module-header">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span class="module-dot" style="background-color: {modInfo.color};"></span>
-                      <span class="module-name">{modInfo.title}</span>
-                    </div>
-                    <button
-                      type="button"
-                      class="module-select-all-btn"
-                      onclick={() => selectAllInModule(perms)}
-                    >
-                      Chọn tất cả ({perms.length})
-                    </button>
-                  </div>
+          <!-- Mật khẩu ban đầu -->
+          <div class="form-group">
+            <label for="passwordInput" class="form-label required">Mật Khẩu Đăng Nhập Ban Đầu</label>
+            <input
+              id="passwordInput"
+              type="text"
+              class="form-input"
+              class:is-invalid={Boolean(formErrors.password)}
+              bind:value={password}
+              placeholder="Tối thiểu 6 ký tự"
+            />
+            {#if formErrors.password}
+              <span class="field-error-text">{formErrors.password}</span>
+            {/if}
+          </div>
 
-                  <div class="perms-grid">
-                    {#each perms as p (p.id)}
-                      {@const checked = selectedPermissionIds.includes(p.id)}
-                      <!-- svelte-ignore a11y_click_events_have_key_events -->
-                      <!-- svelte-ignore a11y_no_static_element_interactions -->
-                      <div
-                        class="perm-checkbox-item"
-                        class:is-checked={checked}
-                        onclick={() => togglePermission(p.id)}
-                      >
-                        <input
-                          type="checkbox"
-                          class="perm-native-checkbox"
-                          {checked}
-                          tabindex="-1"
-                        />
-                        <div class="perm-info">
-                          <div class="perm-title">{p.name}</div>
-                          {#if p.description}
-                            <div class="perm-desc">{p.description}</div>
-                          {/if}
-                        </div>
-                      </div>
-                    {/each}
-                  </div>
-                </div>
-              {/each}
+          <!-- Email & Số điện thoại -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="emailInput" class="form-label">Email Doanh Nghiệp</label>
+              <input
+                id="emailInput"
+                type="email"
+                class="form-input"
+                bind:value={email}
+                placeholder="duc.nguyen@premiernuts.vn"
+              />
             </div>
-          {/if}
+            <div class="form-group">
+              <label for="phoneInput" class="form-label">Số Điện Thoại</label>
+              <input
+                id="phoneInput"
+                type="text"
+                class="form-input"
+                bind:value={phone}
+                placeholder="Ví dụ: 0912345678"
+              />
+            </div>
+          </div>
+
+          <!-- Phòng ban -->
+          <div class="form-group">
+            <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
+            <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
+              {#each departments as dept (dept.id)}
+                <option value={dept.id}>{dept.name}</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Cột phải: Thẻ tóm tắt hồ sơ & Cấp bậc phân quyền -->
+      <Card accent={CARD_ACCENTS.ORANGE}>
+        <div class="card-header-styled">
+          <h3 class="card-section-title">Hồ Sơ & Trạng Thái Khởi Tạo</h3>
+          <p class="card-section-desc">Tổng quan thông số định danh và mức độ phân quyền tài khoản</p>
+        </div>
+
+        <div class="account-overview-box">
+          <div class="profile-header-flex">
+            <div class="profile-avatar-circle">{userInitials}</div>
+            <div class="profile-meta-info">
+              <div class="profile-name-text">{fullName || 'Chưa nhập họ tên'}</div>
+              <div class="profile-username-sub">@{autoUsername || 'auto_username'}</div>
+              <div class="profile-status-pill">
+                <span class="status-indicator-dot"></span>
+                <span class="status-indicator-text">Sẵn sàng khởi tạo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-stats-grid">
+            <div class="stat-mini-card">
+              <span class="stat-label">Phòng Ban</span>
+              <span class="stat-value">{selectedDepartment?.name || 'Chưa phân bổ'}</span>
+            </div>
+            <div class="stat-mini-card">
+              <span class="stat-label">Chức Danh Vai Trò</span>
+              <span class="stat-value">{selectedRole?.name || 'Chưa chọn'}</span>
+            </div>
+            <div class="stat-mini-card">
+              <span class="stat-label">Quyền Hạn Kích Hoạt</span>
+              <span class="stat-value highlight-green">{selectedPermissionIds.length} quyền hạn</span>
+            </div>
+            <div class="stat-mini-card">
+              <span class="stat-label">Cấp Bậc Quản Trị</span>
+              <span class="stat-value">Cấp {selectedRole?.level || 99}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-notes-section">
+          <div class="security-note-item">
+            <span class="note-bullet-dot"></span>
+            <span class="note-text"><strong>Nguyên tắc phân quyền:</strong> Phân bổ quyền hạn theo đúng phạm vi trách nhiệm nghiệp vụ.</span>
+          </div>
+          <div class="security-note-item">
+            <span class="note-bullet-dot"></span>
+            <span class="note-text"><strong>Mật khẩu ban đầu:</strong> Nhân viên sẽ được yêu cầu đổi mật khẩu trong lần đăng nhập đầu tiên.</span>
+          </div>
+          <div class="security-note-item">
+            <span class="note-bullet-dot"></span>
+            <span class="note-text"><strong>Nhật ký bảo mật:</strong> Mọi thao tác tạo lập tài khoản được lưu vết tự động trong Audit Log.</span>
+          </div>
         </div>
       </Card>
     </div>
 
-    <!-- Thanh Hành Động Cuối Trang -->
+    <!-- HÀNG 2: Vai trò & Phân quyền XUỐNG DƯỚI (Full Width Card) -->
+    <Card accent={CARD_ACCENTS.ORANGE}>
+      <div class="card-header-styled">
+        <h3 class="card-section-title">2. Thiết Lập Vai Trò & Phân Quyền</h3>
+        <p class="card-section-desc">Chọn chức danh mẫu và tùy biến các quyền hạn thực thi trực tiếp</p>
+      </div>
+
+      <div class="form-fields">
+        <!-- Chọn Vai Trò Mẫu -->
+        <div class="form-group">
+          <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu</label>
+          <div class="role-cards-grid">
+            {#each availableRoles as r (r.id)}
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <div
+                class="role-card-item"
+                class:is-selected={selectedRoleId === r.id}
+                onclick={() => handleSelectRole(r.id)}
+              >
+                <div class="role-item-header">
+                  <span class="role-item-name">{r.name}</span>
+                  {#if selectedRoleId === r.id}
+                    <span class="role-selected-check" title="Đã chọn vai trò này">
+                      <svg viewBox="0 0 20 20" fill="currentColor" class="check-icon-svg">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                    </span>
+                  {/if}
+                </div>
+                <div class="role-item-desc">{r.description}</div>
+                <div class="role-item-perm-count">
+                  {r.permissionIds?.length || 0} quyền hạn mặc định
+                </div>
+              </div>
+            {/each}
+          </div>
+          {#if formErrors.roleId}
+            <span class="field-error-text">{formErrors.roleId}</span>
+          {/if}
+        </div>
+
+        <!-- Banner Tùy Biến Permissions -->
+        <div class="custom-perm-toggle-banner">
+          <div>
+            <div class="toggle-title">Ma Trận Quyền Hạn Chi Tiết Cho Tài Khoản Này</div>
+            <div class="toggle-subtitle">
+              Đang kích hoạt <strong>{selectedPermissionIds.length}</strong> / {availablePermissions.length} quyền hệ thống.
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onclick={() => (showCustomPermissions = !showCustomPermissions)}
+          >
+            {#if showCustomPermissions}
+              Thu gọn danh sách quyền
+            {:else}
+              Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
+            {/if}
+          </Button>
+        </div>
+
+        <!-- Danh sách permissions mở rộng -->
+        {#if showCustomPermissions}
+          <div class="permissions-matrix-wrap">
+            {#each Object.entries(groupedPermissions) as [moduleKey, perms] (moduleKey)}
+              {@const modInfo = getModuleMeta(moduleKey)}
+              <div class="permission-module-block">
+                <div class="module-header">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="module-dot" style="background-color: {modInfo.color};"></span>
+                    <span class="module-name">{modInfo.title}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="module-select-all-btn"
+                    onclick={() => selectAllInModule(perms)}
+                  >
+                    Chọn tất cả ({perms.length})
+                  </button>
+                </div>
+
+                <div class="perms-grid">
+                  {#each perms as p (p.id)}
+                    {@const checked = selectedPermissionIds.includes(p.id)}
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    <div
+                      class="perm-checkbox-item"
+                      class:is-checked={checked}
+                      onclick={() => togglePermission(p.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-native-checkbox"
+                        {checked}
+                        tabindex="-1"
+                      />
+                      <div class="perm-info">
+                        <div class="perm-title">{p.name}</div>
+                        {#if p.description}
+                          <div class="perm-desc">{p.description}</div>
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    </Card>
+
+    <!-- HÀNG 3: Thanh Hành Động Cuối Trang -->
     <div class="page-actions-bar">
       <Button variant="secondary" onclick={() => goto('/identity')} disabled={isSubmitting}>
         Hủy bỏ & Quay lại
@@ -549,33 +548,24 @@
 {/if}
 
 <style>
-  .create-user-container {
+  .user-page-container {
     display: flex;
     flex-direction: column;
     gap: 24px;
     padding-bottom: 40px;
   }
 
-  .form-grid {
+  .top-row-grid {
     display: grid;
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 24px;
-    align-items: start;
+    align-items: stretch;
   }
 
-  @media (max-width: 1024px) {
-    .form-grid {
+  @media (max-width: 960px) {
+    .top-row-grid {
       grid-template-columns: 1fr;
     }
-  }
-
-  .left-col-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    position: sticky;
-    top: 16px;
-    align-self: start;
   }
 
   .card-header-styled {
@@ -853,21 +843,21 @@
   /* Role Cards Grid */
   .role-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
     margin-top: 4px;
   }
 
   .role-card-item {
     border: 1.5px solid var(--pn-line, #EEE3D3);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: #FFF;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   }
 
   .role-card-item:hover {
@@ -889,7 +879,7 @@
   }
 
   .role-item-name {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
   }
@@ -914,13 +904,13 @@
   }
 
   .role-item-desc {
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--pn-ink-soft, #6B5D4F);
-    line-height: 1.3;
+    line-height: 1.35;
   }
 
   .role-item-perm-count {
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 700;
     color: #059669;
     margin-top: 4px;
@@ -931,7 +921,7 @@
     background: #FAF7F2;
     border: 1px solid var(--pn-line, #EEE3D3);
     border-radius: 8px;
-    padding: 12px 16px;
+    padding: 14px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -941,13 +931,13 @@
   }
 
   .toggle-title {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
   }
 
   .toggle-subtitle {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--pn-ink-soft, #6B5D4F);
   }
 
@@ -963,26 +953,26 @@
     background: #FFF;
     border: 1px solid var(--pn-line, #EEE3D3);
     border-radius: 8px;
-    padding: 14px;
+    padding: 16px;
   }
 
   .module-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
     border-bottom: 1px dashed var(--pn-line, #EEE3D3);
   }
 
   .module-dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
   }
 
   .module-name {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 800;
     color: var(--pn-ink, #2B2116);
     text-transform: uppercase;
@@ -992,7 +982,7 @@
   .module-select-all-btn {
     background: none;
     border: none;
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--pn-orange, #F0821E);
     font-weight: 700;
     cursor: pointer;
@@ -1001,17 +991,17 @@
 
   .perms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
   }
 
   .perm-checkbox-item {
     border: 1px solid var(--pn-line, #EEE3D3);
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     transition: all 0.15s ease;
     background: #FAFAFA;
@@ -1033,15 +1023,16 @@
   }
 
   .perm-title {
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--pn-ink, #2B2116);
   }
 
   .perm-desc {
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--pn-ink-soft, #6B5D4F);
     margin-top: 2px;
+    line-height: 1.35;
   }
 
   /* Actions Bar */
