@@ -51,31 +51,18 @@
   let formErrors = $state<Record<string, string>>({});
   let isSubmitting = $state(false);
 
-  let availableRoles = $derived.by(() => {
-    return roles.filter((r) => {
-      if (authStore.isAdmin) {
-        return true;
-      }
-      return r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN';
-    });
-  });
+  let availableRoles = $derived(
+    roles.filter((r) => authStore.isAdmin || (r.code !== 'ROLE_ADMIN' && r.code !== 'SUPER_ADMIN'))
+  );
 
-  let availablePermissions = $derived.by(() => {
-    return allPermissions.filter((p) => {
-      if (authStore.isAdmin) {
-        return true;
-      }
-      return p.module !== 'SYSTEM';
-    });
-  });
+  let availablePermissions = $derived(
+    allPermissions.filter((p) => authStore.isAdmin || p.module !== 'SYSTEM')
+  );
 
   let groupedPermissions = $derived.by(() => {
     const groups: Record<string, Permission[]> = {};
     for (const p of availablePermissions) {
-      let mod = 'KHAC';
-      if (p.module) {
-        mod = p.module;
-      }
+      const mod = p.module || 'KHAC';
       if (!groups[mod]) {
         groups[mod] = [];
       }
@@ -118,11 +105,7 @@
         selectedPermissionIds = [];
       }
     } catch (err: any) {
-      let msg = 'Lỗi kết nối';
-      if (err.message) {
-        msg = err.message;
-      }
-      toast.error('Không thể nạp thông tin người dùng: ' + msg);
+      toast.error('Không thể nạp thông tin người dùng: ' + (err.message || 'Lỗi mạng'));
     } finally {
       loadingData = false;
     }
@@ -142,10 +125,11 @@
     selectedRoleId = roleId;
     delete formErrors.roleId;
 
-    // Tự động điền danh sách quyền mặc định theo vai trò được chọn
     const r = roles.find((item) => item.id === roleId);
     if (r && Array.isArray(r.permissionIds)) {
       selectedPermissionIds = [...r.permissionIds];
+    } else {
+      selectedPermissionIds = [];
     }
   }
 
@@ -234,44 +218,32 @@
 
 {#if loadingData}
   <Card accent={CARD_ACCENTS.ORANGE}>
-    <div class="loading-state">
-      Đang nạp dữ liệu hồ sơ nhân sự và cấu hình phân quyền...
+    <div style="padding: 40px; text-align: center; color: var(--pn-ink-soft);">
+      Đang nạp dữ liệu hồ sơ nhân sự và ma trận phân quyền...
     </div>
   </Card>
 {:else}
-  <div class="edit-user-container">
+  <div class="create-user-container">
     <div class="form-grid">
-      <!-- Cột 1: Thông tin nhân sự cơ bản -->
+      <!-- Cột 1: Thông tin cơ bản & Đăng nhập -->
       <Card accent={CARD_ACCENTS.ORANGE}>
         <div class="card-header-styled">
-          <h3 class="card-section-title">1. Thông Tin Nhân Sự Cơ Bản</h3>
-          <p class="card-section-desc">Họ tên, mã định danh đăng nhập và thông tin liên hệ phòng ban</p>
+          <h3 class="card-section-title">1. Thông Tin Nhân Sự & Đăng Nhập</h3>
+          <p class="card-section-desc">Họ tên, mã định danh tài khoản và thông tin phòng ban trực thuộc</p>
         </div>
 
         <div class="form-fields">
-          <!-- Tên đăng nhập (Readonly) -->
-          <div class="form-group">
-            <div class="label-with-badge">
-              <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
-              <Badge variant={BADGE_VARIANTS.PRIMARY}>Cố định</Badge>
-            </div>
-            <div class="readonly-username-box">
-              <span class="username-at">@</span>
-              <span class="username-code">{username}</span>
-            </div>
-          </div>
-
           <!-- Họ và tên -->
           <div class="form-group">
-            <label for="fullNameEditInput" class="form-label required">Họ và Tên Nhân Sự</label>
+            <label for="fullNameInput" class="form-label required">Họ và Tên Nhân Sự</label>
             <input
-              id="fullNameEditInput"
+              id="fullNameInput"
               type="text"
               class="form-input"
               class:is-invalid={Boolean(formErrors.fullName)}
               value={fullName}
               oninput={handleFullNameInput}
-              placeholder="Ví dụ: Nguyễn Đình Đức..."
+              placeholder="Ví dụ: Nguyễn Đình Đức, John Smith..."
             />
             {#if formErrors.fullName}
               <span class="field-error-text">{formErrors.fullName}</span>
@@ -280,12 +252,27 @@
             {/if}
           </div>
 
+          <!-- Tên đăng nhập (Readonly Display Box - Styled identically to Create) -->
+          <div class="form-group">
+            <div class="label-with-badge">
+              <span class="form-label">Tên Đăng Nhập Hệ Thống</span>
+              <Badge variant={BADGE_VARIANTS.PRIMARY}>Cố định</Badge>
+            </div>
+            <div class="auto-username-box">
+              <div class="username-display">
+                <span class="username-at">@</span>
+                <span class="username-code">{username}</span>
+                <span class="username-status">Đang hoạt động</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Email & Số điện thoại -->
           <div class="form-row-2">
             <div class="form-group">
-              <label for="emailEditInput" class="form-label">Email Doanh Nghiệp</label>
+              <label for="emailInput" class="form-label">Email Doanh Nghiệp</label>
               <input
-                id="emailEditInput"
+                id="emailInput"
                 type="email"
                 class="form-input"
                 bind:value={email}
@@ -293,9 +280,9 @@
               />
             </div>
             <div class="form-group">
-              <label for="phoneEditInput" class="form-label">Số Điện Thoại</label>
+              <label for="phoneInput" class="form-label">Số Điện Thoại</label>
               <input
-                id="phoneEditInput"
+                id="phoneInput"
                 type="text"
                 class="form-input"
                 bind:value={phone}
@@ -306,8 +293,8 @@
 
           <!-- Phòng ban -->
           <div class="form-group">
-            <label for="deptEditSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
-            <select id="deptEditSelect" class="form-select" bind:value={selectedDepartmentId}>
+            <label for="deptSelect" class="form-label">Phòng Ban / Phân Xưởng Trực Thuộc</label>
+            <select id="deptSelect" class="form-select" bind:value={selectedDepartmentId}>
               {#each departments as dept (dept.id)}
                 <option value={dept.id}>{dept.name}</option>
               {/each}
@@ -316,7 +303,7 @@
         </div>
       </Card>
 
-      <!-- Cột 2: Vai trò chức danh & Ma trận quyền hạn -->
+      <!-- Cột 2: Vai trò & Phân quyền -->
       <Card accent={CARD_ACCENTS.ORANGE}>
         <div class="card-header-styled">
           <h3 class="card-section-title">2. Thiết Lập Vai Trò & Phân Quyền</h3>
@@ -326,7 +313,7 @@
         <div class="form-fields">
           <!-- Chọn Vai Trò Mẫu -->
           <div class="form-group">
-            <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò</label>
+            <label for="roleTemplateSelect" class="form-label required">Chức Danh / Vai Trò Mẫu</label>
             <div class="role-cards-grid">
               {#each availableRoles as r (r.id)}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -428,50 +415,33 @@
       </Card>
     </div>
 
-    <!-- Thanh Điều Khiển Submit Phía Dưới -->
-    <div class="bottom-actions-card">
-      <div class="actions-wrapper">
-        <Button
-          variant="secondary"
-          onclick={() => goto('/identity')}
-          disabled={isSubmitting}
-        >
-          Hủy bỏ
-        </Button>
-        <Button
-          variant="primary"
-          onclick={handleSubmit}
-          disabled={isSubmitting}
-        >
-          {#if isSubmitting}
-            Đang lưu thay đổi...
-          {:else}
-            Lưu thay đổi tài khoản
-          {/if}
-        </Button>
-      </div>
+    <!-- Thanh Hành Động Cuối Trang -->
+    <div class="page-actions-bar">
+      <Button variant="secondary" onclick={() => goto('/identity')} disabled={isSubmitting}>
+        Hủy bỏ & Quay lại
+      </Button>
+      <Button variant="primary" onclick={handleSubmit} disabled={isSubmitting}>
+        {#if isSubmitting}
+          Đang lưu thay đổi...
+        {:else}
+          Lưu thay đổi tài khoản
+        {/if}
+      </Button>
     </div>
   </div>
 {/if}
 
 <style>
-  .edit-user-container {
+  .create-user-container {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    margin-bottom: 40px;
-  }
-
-  .loading-state {
-    padding: 48px;
-    text-align: center;
-    color: var(--pn-ink-soft, #6b5d4f);
-    font-size: 14px;
+    padding-bottom: 40px;
   }
 
   .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 24px;
     align-items: start;
   }
@@ -484,21 +454,21 @@
 
   .card-header-styled {
     margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--pn-line, #eee3d3);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--pn-line, #EEE3D3);
   }
 
   .card-section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--pn-ink, #2b2116);
     margin: 0 0 4px 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--pn-ink, #2B2116);
   }
 
   .card-section-desc {
-    font-size: 13px;
-    color: var(--pn-ink-soft, #6b5d4f);
     margin: 0;
+    font-size: 13px;
+    color: var(--pn-ink-soft, #6B5D4F);
   }
 
   .form-fields {
@@ -507,16 +477,10 @@
     gap: 18px;
   }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
   .form-row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   @media (max-width: 640px) {
@@ -525,161 +489,183 @@
     }
   }
 
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .form-label {
     font-size: 13px;
-    font-weight: 600;
-    color: var(--pn-ink, #2b2116);
+    font-weight: 700;
+    color: var(--pn-ink, #2B2116);
   }
 
   .form-label.required::after {
     content: ' *';
-    color: #dc2626;
+    color: #DC2626;
   }
 
   .label-with-badge {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-  }
-
-  .readonly-username-box {
-    display: flex;
     align-items: center;
-    padding: 10px 14px;
-    background-color: #f7f4ed;
-    border: 1px solid var(--pn-line, #eee3d3);
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 14px;
-    color: var(--pn-ink, #2b2116);
   }
 
-  .username-at {
-    color: var(--pn-orange, #f0821e);
-    font-weight: 700;
-    margin-right: 2px;
-  }
-
-  .username-code {
-    font-weight: 600;
-  }
-
-  .form-input,
-  .form-select {
+  .form-input, .form-select {
     width: 100%;
     padding: 10px 14px;
-    border: 1px solid var(--pn-line, #eee3d3);
-    border-radius: 6px;
-    font-size: 13px;
-    color: var(--pn-ink, #2b2116);
-    background-color: var(--pn-paper, #ffffff);
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: 8px;
+    background: #FFF;
+    font-size: 14px;
+    color: var(--pn-ink, #2B2116);
+    transition: all 0.2s ease;
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .form-input:focus,
-  .form-select:focus {
+  .form-input:focus, .form-select:focus {
     outline: none;
-    border-color: var(--pn-orange, #f0821e);
+    border-color: var(--pn-orange, #F0821E);
     box-shadow: 0 0 0 3px rgba(240, 130, 30, 0.15);
   }
 
   .form-input.is-invalid {
-    border-color: #dc2626 !important;
-    background-color: #fffaf9 !important;
+    border-color: #DC2626 !important;
+    background-color: #FEF2F2 !important;
   }
 
   .field-error-text {
     font-size: 12px;
-    color: #dc2626;
-    margin-top: 2px;
+    color: #DC2626;
+    font-weight: 600;
   }
 
   .field-hint-text {
-    font-size: 11px;
-    color: var(--pn-ink-soft, #6b5d4f);
-    margin-top: 2px;
+    font-size: 12px;
+    color: var(--pn-ink-soft, #6B5D4F);
+  }
+
+  /* Auto / Readonly Username Box */
+  .auto-username-box {
+    background: #FAF7F2;
+    border: 1.5px dashed var(--pn-orange, #F0821E);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+  }
+
+  .username-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .username-at {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--pn-orange, #F0821E);
+  }
+
+  .username-code {
+    font-size: 16px;
+    font-weight: 800;
+    font-family: monospace;
+    color: #1E3A8A;
+    background: #DBEAFE;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .username-status {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 600;
   }
 
   /* Role Cards Grid */
   .role-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
+    gap: 10px;
+    margin-top: 4px;
   }
 
   .role-card-item {
+    border: 1.5px solid var(--pn-line, #EEE3D3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #FFF;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding: 12px;
-    border: 1px solid var(--pn-line, #eee3d3);
-    border-radius: 8px;
-    background-color: var(--pn-paper, #ffffff);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
+    gap: 4px;
   }
 
   .role-card-item:hover {
-    border-color: #d1bfa8;
-    background-color: #fffdf9;
+    border-color: var(--pn-orange, #F0821E);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   }
 
   .role-card-item.is-selected {
-    border-color: var(--pn-orange, #f0821e);
-    background-color: #fff9f3;
-    box-shadow: 0 4px 12px rgba(240, 130, 30, 0.12);
+    border-color: var(--pn-orange, #F0821E);
+    background: #FFF8F0;
+    box-shadow: 0 0 0 2px var(--pn-orange, #F0821E);
   }
 
   .role-item-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    align-items: center;
   }
 
   .role-item-name {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--pn-ink, #2b2116);
+    color: var(--pn-ink, #2B2116);
   }
 
   .role-item-desc {
-    font-size: 11px;
-    color: var(--pn-ink-soft, #6b5d4f);
-    line-height: 1.4;
-    margin-bottom: 8px;
+    font-size: 11.5px;
+    color: var(--pn-ink-soft, #6B5D4F);
+    line-height: 1.3;
   }
 
   .role-item-perm-count {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--pn-orange, #f0821e);
+    font-weight: 700;
+    color: #059669;
+    margin-top: 4px;
   }
 
   /* Custom Permissions Toggle Banner */
   .custom-perm-toggle-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    background-color: #fffaf4;
-    border: 1px dashed var(--pn-orange, #f0821e);
+    background: #FAF7F2;
+    border: 1px solid var(--pn-line, #EEE3D3);
     border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
+    margin-top: 6px;
   }
 
   .toggle-title {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--pn-ink, #2b2116);
-    margin-bottom: 2px;
+    color: var(--pn-ink, #2B2116);
   }
 
   .toggle-subtitle {
     font-size: 12px;
-    color: var(--pn-ink-soft, #6b5d4f);
+    color: var(--pn-ink-soft, #6B5D4F);
   }
 
   /* Permissions Matrix */
@@ -687,23 +673,23 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-top: 8px;
+    margin-top: 8px;
   }
 
   .permission-module-block {
-    border: 1px solid var(--pn-line, #eee3d3);
+    background: #FFF;
+    border: 1px solid var(--pn-line, #EEE3D3);
     border-radius: 8px;
-    overflow: hidden;
-    background-color: var(--pn-paper, #ffffff);
+    padding: 14px;
   }
 
   .module-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
-    background-color: #faf7f2;
-    border-bottom: 1px solid var(--pn-line, #eee3d3);
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--pn-line, #EEE3D3);
   }
 
   .module-dot {
@@ -713,93 +699,74 @@
   }
 
   .module-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--pn-ink, #2b2116);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--pn-ink, #2B2116);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03em;
   }
 
   .module-select-all-btn {
     background: none;
     border: none;
-    color: var(--pn-orange, #f0821e);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 11.5px;
+    color: var(--pn-orange, #F0821E);
+    font-weight: 700;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .module-select-all-btn:hover {
-    background-color: rgba(240, 130, 30, 0.1);
+    text-decoration: underline;
   }
 
   .perms-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1px;
-    background-color: var(--pn-line, #eee3d3);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
   }
 
   .perm-checkbox-item {
+    border: 1px solid var(--pn-line, #EEE3D3);
+    border-radius: 6px;
+    padding: 8px 10px;
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 10px 14px;
-    background-color: var(--pn-paper, #ffffff);
+    gap: 8px;
     cursor: pointer;
-    transition: background-color 0.15s ease;
-    user-select: none;
+    transition: all 0.15s ease;
+    background: #FAFAFA;
   }
 
   .perm-checkbox-item:hover {
-    background-color: #fffdfa;
+    background: #FFF;
+    border-color: var(--pn-orange, #F0821E);
   }
 
   .perm-checkbox-item.is-checked {
-    background-color: #fff9f3;
+    background: #FFF9F2;
+    border-color: var(--pn-orange, #F0821E);
   }
 
   .perm-native-checkbox {
-    margin-top: 2px;
-    cursor: pointer;
-    accent-color: var(--pn-orange, #f0821e);
-  }
-
-  .perm-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    margin-top: 3px;
+    accent-color: var(--pn-orange, #F0821E);
   }
 
   .perm-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--pn-ink, #2b2116);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--pn-ink, #2B2116);
   }
 
   .perm-desc {
     font-size: 11px;
-    color: var(--pn-ink-soft, #6b5d4f);
-    line-height: 1.3;
+    color: var(--pn-ink-soft, #6B5D4F);
+    margin-top: 2px;
   }
 
-  /* Bottom Actions Card */
-  .bottom-actions-card {
-    position: sticky;
-    bottom: 16px;
-    background-color: var(--pn-paper, #ffffff);
-    border: 1px solid var(--pn-line, #eee3d3);
-    border-radius: 8px;
-    padding: 16px 24px;
-    box-shadow: 0 4px 16px rgba(43, 33, 22, 0.08);
-  }
-
-  .actions-wrapper {
+  /* Actions Bar */
+  .page-actions-bar {
     display: flex;
-    align-items: center;
     justify-content: flex-end;
     gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--pn-line, #EEE3D3);
   }
 </style>
