@@ -142,7 +142,7 @@
     </Button>
     {#if authStore.isAdmin}
       <Button variant="primary" onclick={openEditCompanyModal}>
-        ✏️ Chỉnh sửa thông tin
+        Chỉnh sửa thông tin
       </Button>
     {/if}
   {/snippet}

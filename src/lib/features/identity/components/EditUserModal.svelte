@@ -218,7 +218,7 @@
             {#if authStore.isAdmin}
               <Badge variant={BADGE_VARIANTS.WARNING}>Admin được phép sửa</Badge>
             {:else}
-              <Badge variant={BADGE_VARIANTS.NEUTRAL}>🔒 Chỉ Admin được sửa</Badge>
+              <Badge variant={BADGE_VARIANTS.NEUTRAL}>Chỉ Admin được sửa</Badge>
             {/if}
           </div>
           <input
@@ -327,9 +327,9 @@
           onclick={() => (showCustomPermissions = !showCustomPermissions)}
         >
           {#if showCustomPermissions}
-            ▲ Thu gọn danh sách quyền
+            Thu gọn danh sách quyền
           {:else}
-            ▼ Xem & tùy chỉnh chi tiết ({selectedPermissionIds.length} quyền)
+            Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
           {/if}
         </Button>
       </div>
@@ -389,7 +389,7 @@
         Hủy bỏ
       </Button>
       <Button variant="primary" onclick={handleSave} disabled={isSubmitting}>
-        {#if isSubmitting}Đang lưu...{:else}💾 Lưu thay đổi{/if}
+        {#if isSubmitting}Đang lưu...{:else}Lưu thay đổi{/if}
       </Button>
     </div>
   {/snippet}

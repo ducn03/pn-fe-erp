@@ -164,7 +164,7 @@
             onclick={handleSaveRoleTemplate}
             disabled={isSaving || !authStore.isAdmin}
           >
-            {#if isSaving}Đang lưu...{:else}💾 Lưu Khuôn Mẫu Quyền{/if}
+            {#if isSaving}Đang lưu...{:else}Lưu khuôn mẫu quyền{/if}
           </Button>
         </div>
 

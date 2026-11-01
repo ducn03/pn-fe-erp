@@ -72,7 +72,7 @@
     class:active={activeTab === 'users'}
     onclick={() => (activeTab = 'users')}
   >
-    👤 Danh Sách Nhân Sự & Tài Khoản ({users.length})
+    Danh Sách Nhân Sự & Tài Khoản ({users.length})
   </button>
   <button
     type="button"
@@ -80,7 +80,7 @@
     class:active={activeTab === 'templates'}
     onclick={() => (activeTab = 'templates')}
   >
-    🛡️ Khuôn Mẫu Phân Quyền Vai Trò (Role Templates)
+    Khuôn Mẫu Phân Quyền Vai Trò (Role Templates)
   </button>
 </div>
 

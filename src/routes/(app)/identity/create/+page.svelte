@@ -276,7 +276,7 @@
                 <div class="username-display">
                   <span class="username-at">@</span>
                   <span class="username-code">{autoUsername}</span>
-                  <span class="username-status">✓ Khả dụng trong toàn hệ thống</span>
+                  <span class="username-status">Khả dụng</span>
                 </div>
               {:else}
                 <span class="placeholder-text">Sẽ tự động tạo khi bạn nhập họ tên hợp lệ ở trên</span>
@@ -389,9 +389,9 @@
               onclick={() => (showCustomPermissions = !showCustomPermissions)}
             >
               {#if showCustomPermissions}
-                ▲ Ẩn danh sách quyền chi tiết
+                Thu gọn danh sách quyền
               {:else}
-                ▼ Xem & tùy chỉnh chi tiết ({selectedPermissionIds.length} quyền)
+                Tùy chỉnh quyền chi tiết ({selectedPermissionIds.length} quyền)
               {/if}
             </Button>
           </div>
@@ -459,7 +459,7 @@
         {#if isSubmitting}
           Đang khởi tạo tài khoản...
         {:else}
-          ✓ Xác nhận tạo tài khoản nhân sự
+          Tạo tài khoản nhân sự
         {/if}
       </Button>
     </div>

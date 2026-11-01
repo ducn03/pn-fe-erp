@@ -168,7 +168,7 @@
         {#if loading}
           Đang làm mới...
         {:else}
-          🔄 Làm mới dữ liệu
+          Làm mới dữ liệu
         {/if}
       </Button>
     {/if}
@@ -179,7 +179,6 @@
   <!-- Access Denied for Non-Admin -->
   <Card accent="orange">
     <div class="access-denied-wrap">
-      <div class="access-icon">🚫</div>
       <h2 class="access-title">Khu vực Giới hạn Quyền Quản trị</h2>
       <p class="access-desc">
         Màn hình theo dõi nhật ký truy cập và kiểm toán an toàn thông tin chỉ dành riêng cho tài khoản
@@ -199,28 +198,24 @@
     <StatCard
       title="Tổng số lượt truy cập (Trang này)"
       value={logs.length}
-      icon="📋"
       trend="neutral"
       change="Tổng bản ghi login hiện tại"
     />
     <StatCard
       title="Đăng nhập Thành công"
       value={successCount}
-      icon="✅"
       trend="up"
       change="Xác thực danh tính hợp lệ"
     />
     <StatCard
       title="Thất bại / Bất thường"
       value={failedCount}
-      icon="⚠️"
       trend="down"
       change="Sai mật khẩu hoặc bị chặn"
     />
     <StatCard
       title="Tỷ lệ Bất thường"
       value={abnormalRate}
-      icon="🛡️"
       trend="neutral"
       change="Nguy cơ rủi ro an ninh"
     />
@@ -232,7 +227,12 @@
       <div class="filter-field search-box">
         <label for="log-search-input">Tìm kiếm nhanh:</label>
         <div class="input-with-icon">
-          <span class="icon">🔍</span>
+          <span class="icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <input
             id="log-search-input"
             type="text"
@@ -249,8 +249,8 @@
         <label for="log-status-select">Trạng thái xác thực:</label>
         <select id="log-status-select" bind:value={selectedStatus} onchange={handleFilter}>
           <option value={STATUS_FILTER.ALL}>Toàn bộ trạng thái</option>
-          <option value={STATUS_FILTER.SUCCESS}>✅ Thành công (SUCCESS)</option>
-          <option value={STATUS_FILTER.FAILED}>⚠️ Thất bại / Bất thường (FAILED)</option>
+          <option value={STATUS_FILTER.SUCCESS}>Thành công (SUCCESS)</option>
+          <option value={STATUS_FILTER.FAILED}>Thất bại / Bất thường (FAILED)</option>
         </select>
       </div>
 
@@ -276,7 +276,7 @@
       </div>
       {#if failedCount > 0}
         <div class="warning-pill">
-          ⚠️ Phát hiện {failedCount} lần đăng nhập bất thường!
+          Cảnh báo: Có {failedCount} lần đăng nhập bất thường
         </div>
       {/if}
     </div>
@@ -288,7 +288,6 @@
       </div>
     {:else if logs.length === 0}
       <div class="table-state-box empty">
-        <p class="empty-icon">📭</p>
         <p class="empty-title">Không tìm thấy bản ghi nhật ký phù hợp</p>
         <p class="empty-sub">Hãy thử thay đổi từ khóa hoặc bộ lọc trạng thái</p>
       </div>
@@ -341,7 +340,7 @@
                     <span class="reason-ok">Xác thực thành công</span>
                   {:else}
                     <span class="reason-err">
-                      ⚠️ {log.failureReason || 'Sai mật khẩu hoặc tài khoản chưa kích hoạt'}
+                      {log.failureReason || 'Sai mật khẩu hoặc tài khoản chưa kích hoạt'}
                     </span>
                   {/if}
                 </td>
@@ -386,11 +385,6 @@
     text-align: center;
     max-width: 620px;
     margin: 0 auto;
-  }
-
-  .access-icon {
-    font-size: 56px;
-    margin-bottom: 16px;
   }
 
   .access-title {
@@ -533,11 +527,6 @@
 
   .table-state-box.empty {
     padding: 60px 20px;
-  }
-
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
   }
 
   .empty-title {
